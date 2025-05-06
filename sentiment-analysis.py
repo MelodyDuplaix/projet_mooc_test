@@ -115,7 +115,7 @@ def get_message_for_thread(id: str, mongo_url: str, collec_name: str):
 if __name__ == "__main__":
     id = "52ef4f99344caaf903000158"
     mongo_url = os.getenv("MONGO_URL")
-    collec_name = "G0"
+    collec_name = "G1"
     if not mongo_url:
         raise ValueError("MONGO_URL environment variable is not set")
     print(get_message_for_thread(id, mongo_url, collec_name))
