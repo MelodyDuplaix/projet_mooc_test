@@ -176,7 +176,6 @@ cython_debug/
 data/doc_embed.csv
 data/documents.csv
 data/similarity_indexes.csv
-.env.exemple
 db_utils.py
 embedding_utils.py
 main.py
