@@ -13,6 +13,12 @@ if not all([db_host, db_port, db_name, db_user, db_password]):
     raise ValueError("One or more database environment variables are not set: (DB_HOST, DB_PORT, DB_NAME, DB_USER, DB_PASSWORD)")
 
 def connect_to_db():
+    """
+    Fonction qui se connecte à la base de données PostgreSQL.
+
+    Returns:
+        con: Connection à la base de données.
+    """
     try:
         connection = psycopg2.connect(
             host=db_host,
