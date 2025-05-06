@@ -104,11 +104,11 @@ def get_message_for_thread(id: str):
         result_list.append({
             "message": message,
             "label": result["label"],
-            "score": result["score"],
-            "methode": result["methode"]
+            "score": result["score"]
         })
     return result_list
     
 if __name__ == "__main__":
     id = "52ef4f99344caaf903000158"
     print(get_message_for_thread(id))
+ 
