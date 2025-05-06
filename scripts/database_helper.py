@@ -51,15 +51,50 @@ def get_all_vectors_from_db(conn):
         print(f"Error fetching vectors from the database: {e}")
         return []
     
+def get_similar_documents(conn, id, limit=5):
+    """
+    Récupère les documents similaires à un document donné.
+    
+    Args:
+        conn: Connection à la base de données.
+        id: ID du document à comparer.
+        limit: Nombre de documents similaires à récupérer.
+        
+    Returns:
+        list: Liste de documents similaires.
+    """
+    try:
+        query = """
+        SELECT id, vector, 1 - (vector <=> (SELECT vector FROM embedding e2 WHERE id = %s)) AS similarity
+        FROM embedding e 
+        WHERE id != %s
+        ORDER BY similarity DESC
+        LIMIT %s;
+        """
+        cursor = conn.cursor()
+        cursor.execute(query, (id, id, limit))
+        return cursor.fetchall()
+    except Exception as e:
+        print(f"Error getting similar documents: {e}")
+        return []
+    
 if __name__ == "__main__":
     conn = connect_to_db()
     if conn:
-        print("Connection to the database was successful.")
         vectors = get_all_vectors_from_db(conn)
         if vectors:
             print(f"Fetched {len(vectors)} vectors from the database.")
         else:
             print("No vectors found in the database.")
+        first_doc = vectors[0][0] if vectors else None
+        print(f"First document ID: {first_doc}")
+        similar_docs = get_similar_documents(conn, first_doc, limit=10)
+        if similar_docs:
+            print(f"Found {len(similar_docs)} similar documents.")
+            for doc in similar_docs:
+                print(doc)
+        else:
+            print("No similar documents found.")
         conn.close()
     else:
         print("Failed to connect to the database.")
