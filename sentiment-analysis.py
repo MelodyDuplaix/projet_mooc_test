@@ -1,5 +1,5 @@
 from pymongo import MongoClient
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification # type: ignore
 import torch
 import numpy as np
 import os
@@ -58,7 +58,8 @@ def analyse_sentiment_long_texte(texte, model_name="tabularisai/multilingual-sen
         
         # Stocker les scores et labels pour chaque segment
         for label_id in range(len(model.config.id2label)):
-            scores_segments.append(probs[0, label_id].item())
+
+            scores_segments.append(probs[0][label_id].item())
             labels_segments.append(model.config.id2label[label_id])
     
     # Réorganiser les scores par label
@@ -72,7 +73,7 @@ def analyse_sentiment_long_texte(texte, model_name="tabularisai/multilingual-sen
     avg_scores = {label: np.mean(scores) for label, scores in label_scores.items()}
     
     # Trouver le label avec le score moyen le plus élevé
-    final_label = max(avg_scores, key=avg_scores.get)
+    final_label = max(avg_scores.items(), key=lambda x: x[1])[0]
     final_score = avg_scores[final_label]
     
     return {
@@ -83,8 +84,9 @@ def analyse_sentiment_long_texte(texte, model_name="tabularisai/multilingual-sen
             "segments": len(tokens) // (taille_fenetre - chevauchement) + 1,
             "scores_par_label": avg_scores
         }
-    }
 
+    }
+    
 def get_message_for_thread(id: str, mongo_url: str, collec_name: str):
     """
     Fonction qui récupère l'ensemble des messages dans la base de données et applique l'analyse de sentiments sur les messages
