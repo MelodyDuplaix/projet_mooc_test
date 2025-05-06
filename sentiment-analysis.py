@@ -2,6 +2,9 @@ from pymongo import MongoClient
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 import torch
 import numpy as np
+import os
+from dotenv import load_dotenv
+load_dotenv()
 
 def analyse_sentiment_long_texte(texte, model_name="tabularisai/multilingual-sentiment-analysis", 
                                taille_fenetre=384, chevauchement=128):
@@ -82,18 +85,19 @@ def analyse_sentiment_long_texte(texte, model_name="tabularisai/multilingual-sen
         }
     }
 
-def get_message_for_thread(id: str):
+def get_message_for_thread(id: str, mongo_url: str, collec_name: str):
     """
     Fonction qui récupère l'ensemble des messages dans la base de données et applique l'analyse de sentiments sur les messages
 
     Args:
         id (str): identifiant du thread à analyser
     """
-    client = MongoClient('mongodb://localhost:27017/')
-    messages = client["mooc"]["documents"].find({"_id": id})
+    client = MongoClient(mongo_url)
+    messages = client[collec_name]["threads"].find({"_id": id})
     messages_list = []
     for message in messages:
-        messages_list.append(message["body"])
+        messages_list.append(message["content"]["body"])
+        message = message["content"]
         if "children" in message:
             for child in message["children"]:
                 messages_list.append(child["body"])
@@ -110,5 +114,9 @@ def get_message_for_thread(id: str):
     
 if __name__ == "__main__":
     id = "52ef4f99344caaf903000158"
-    print(get_message_for_thread(id))
+    mongo_url = os.getenv("MONGO_URL")
+    collec_name = "G0"
+    if not mongo_url:
+        raise ValueError("MONGO_URL environment variable is not set")
+    print(get_message_for_thread(id, mongo_url, collec_name))
  
