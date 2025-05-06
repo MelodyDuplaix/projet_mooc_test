@@ -1,0 +1,7 @@
+pandas
+psycopg2
+pymongo
+seaborn
+matplotlib
+plotly
+transformers
