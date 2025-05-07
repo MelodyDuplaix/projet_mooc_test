@@ -7,3 +7,4 @@ plotly
 transformers
 fastapi
 uvicorn
+sentence_transformers

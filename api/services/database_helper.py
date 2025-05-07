@@ -82,6 +82,33 @@ def get_similar_documents(conn, id, limit=5):
     except Exception as e:
         print(f"Error getting similar documents: {e}")
         return []
+    
+def get_similars_messages_from_vector(conn, vector, limit=5):
+    """
+    Récupère les messages similaires à un vecteur donné.
+    
+    Args:
+        conn: Connection à la base de données.
+        vector: Vecteur à comparer.
+        limit: Nombre de messages similaires à récupérer.
+        
+    Returns:
+        list: Liste de messages similaires.
+    """
+    try:
+        print(vector)
+        query = """
+        SELECT id, vector, 1 - (vector <=> %s::vector) AS similarity
+        FROM embedding e
+        ORDER BY similarity DESC
+        LIMIT %s;
+        """
+        cursor = conn.cursor()
+        cursor.execute(query, (vector, limit))
+        return cursor.fetchall()
+    except Exception as e:
+        print(f"Error getting similar messages: {e}")
+        return []
 
 def get_similarity_score_between_vectors(conn, id1, id2):
     """
