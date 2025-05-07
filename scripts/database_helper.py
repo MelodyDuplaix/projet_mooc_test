@@ -167,4 +167,4 @@ if __name__ == "__main__":
             print("No similar messages found.")
         conn.close()
     else:
-        print("Failed to connect to the database.")
+        print("Failed to connect to the database.") 
