@@ -178,7 +178,6 @@ data/documents.csv
 data/similarity_indexes.csv
 db_utils.py
 embedding_utils.py
-main.py
 test.ipynb
 test_scraping.ipynb
 test_mongo.ipynb
