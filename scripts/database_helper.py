@@ -81,42 +81,68 @@ def get_similar_documents(conn, id, limit=5):
         print(f"Error getting similar documents: {e}")
         return []
 
-def get_all_data_similar_documents(doc_list, mongo_url, collection_name):
+def get_similarity_score_between_vectors(conn, id1, id2):
     """
-    Récupère les données de tous les messages similaires à partir de la liste d'IDs, et récupère le thread si c'est un message.
-    
+    Récupère le score de similarité entre deux vecteurs.
+
     Args:
-        doc_list: Liste d'IDs de documents similaires.
-        mongo_url: URL de connexion à MongoDB.
-        collection_name: Nom de la collection dans MongoDB.
-        
-    Returns:
-        list: Liste de données de documents similaires.
+        conn (conn): Connection à la base de données.
+        id1 (str): ID du premier vecteur.
+        id2 (str): ID du deuxième vecteur.
     """
+    try:
+        query = """
+        SELECT 1 - (vector <=> (SELECT vector FROM embedding e2 WHERE id = %s)) AS similarity
+        FROM embedding e 
+        WHERE id = %s;
+        """
+        cursor = conn.cursor()
+        cursor.execute(query, (id2, id1))
+        result = cursor.fetchone()
+        return result[0] if result else None
+    except Exception as e:
+        print(f"Error getting similarity score: {e}")
+        return None
+
+def get_all_data_similar_documents(doc_list, mongo_url, collection_name, conn):
     data_list = []
-    seen = set()  # Ensemble pour suivre les combinaisons uniques (id, title)
-    
+    seen = set()
+    thread_children_map = {}
+
     for doc in doc_list:
         id = doc[0]
-        simalarity_score = doc[2]
+        similarity_score = doc[2]
         data = get_data_for_thread(mongo_url, collection_name, id)
         if data:
-            data["similarity_score"] = simalarity_score
+            data["similarity_score"] = similarity_score
             unique_key = (data.get("id"), data.get("title"))
-            
+
             if unique_key not in seen:
                 seen.add(unique_key)
                 if not data.get("title", False):
                     thread_id = data.get("thread_id", None)
-                    thread_data = get_data_for_thread(mongo_url, collection_name, thread_id)
-                    if thread_data:
-                        thread_data["similarity_score"] = simalarity_score
-                        thread_unique_key = (thread_data.get("id"), thread_data.get("title"))
-                        if thread_unique_key not in seen:
-                            seen.add(thread_unique_key)
-                            data_list.append(thread_data)
+                    if thread_id:
+                        if thread_id not in thread_children_map:
+                            thread_children_map[thread_id] = []
+                        thread_children_map[thread_id].append({
+                            "id": id,
+                            "similarity_score": similarity_score
+                        })
                 else:
                     data_list.append(data)
+
+    for thread_id, children_data in thread_children_map.items():
+        thread_data = get_data_for_thread(mongo_url, collection_name, thread_id)
+        if thread_data:
+            thread_data["similarity_score"] = get_similarity_score_between_vectors(
+                conn, thread_id, children_data[0]["id"]
+            )
+            thread_data["similar_messages"] = children_data
+            unique_key = (thread_data.get("id"), thread_data.get("title"))
+            if unique_key not in seen:
+                seen.add(unique_key)
+                data_list.append(thread_data)
+
     return data_list
 
 if __name__ == "__main__":
@@ -126,10 +152,10 @@ if __name__ == "__main__":
         print(f"First message ID: {first_doc}")
         similar_docs = get_similar_documents(conn, first_doc, limit=10)
         if similar_docs:
-            similar_docs = get_all_data_similar_documents(similar_docs, os.getenv("MONGO_URL"), "G1")
+            similar_docs = get_all_data_similar_documents(similar_docs, os.getenv("MONGO_URL"), "G1", conn)
             print(f"Found {len(similar_docs)} similar message.")
             for doc in similar_docs:
-                print(doc["id"], doc["similarity_score"], doc["title"], doc["body"][:100])
+                print(doc["id"], doc["similarity_score"], doc["title"], doc.get("similar_messages", []))
         else:
             print("No similar messages found.")
         conn.close()
