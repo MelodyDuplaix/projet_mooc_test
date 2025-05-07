@@ -96,8 +96,10 @@ def get_all_data_similar_documents(doc_list, mongo_url, collection_name):
     data_list = []
     for doc in doc_list:
         id = doc[0]
+        simalarity_score = doc[2]
         data = get_data_for_message(mongo_url, collection_name, id)
-        if data:
+        data["similarity_score"] = simalarity_score
+        if data and data.get("title",False):
             data_list.append(data)
     return data_list
 
@@ -112,6 +114,8 @@ if __name__ == "__main__":
         first_doc = vectors[0][0] if vectors else None
         print(f"First document ID: {first_doc}")
         similar_docs = get_similar_documents(conn, first_doc, limit=10)
+        for doc in similar_docs:
+            print(f"Document ID: {doc[0]}, Similarity: {doc[2]}")
         if similar_docs:
             similar_docs = get_all_data_similar_documents(similar_docs, os.getenv("MONGO_URL"), "G1")
             print(f"Found {len(similar_docs)} similar documents.")
