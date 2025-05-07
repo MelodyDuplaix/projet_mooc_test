@@ -4,6 +4,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dotenv import load_dotenv
 import psycopg2
 from scripts.mongo_helper import get_data_for_thread
+import csv
+from datetime import datetime
 
 load_dotenv()
 
@@ -156,6 +158,11 @@ if __name__ == "__main__":
             print(f"Found {len(similar_docs)} similar message.")
             for doc in similar_docs:
                 print(doc["id"], doc["similarity_score"], doc["title"], doc.get("similar_messages", []))
+            csv_file = f"data/similar_messages_{first_doc}.csv"
+            with open(csv_file, mode='a', newline='', encoding='utf-8') as file:
+                writer = csv.writer(file)
+                for doc in similar_docs:
+                    writer.writerow([doc["id"], doc["similarity_score"], doc["title"], doc.get("similar_messages", []), datetime.now()])
         else:
             print("No similar messages found.")
         conn.close()
