@@ -13,6 +13,9 @@ from api.services.auth import get_api_key
 import config
 from api.services.database_helper import connect_to_db, get_all_vectors_from_db, get_similar_documents, get_all_data_similar_documents, get_similars_messages_from_vector
 from api.services.mongo_helper import get_data_for_thread
+from api.services import sentiment as sentiment_analysis_service  # Import with a more descriptive alias
+from pydantic import BaseModel
+
 
 
 # Create FastAPI app
@@ -71,6 +74,15 @@ async def get_similars_for_tread(request: Request, id: str, auth: dict = Depends
             return JSONResponse(content={"error": "No similar messages found."}, status_code=404)  
     else:
         return JSONResponse(content={"error": "Failed to connect to the database."}, status_code=500)
+    
+@app.post("/thread_sentiment", tags=["Analyse de sentiments"])
+async def analyse_thread_sentiment(request: Request, id:str, auth: dict = Depends(get_api_key)):
+
+    mongo_url = os.getenv("MONGO_URL")
+    if not mongo_url:
+        return JSONResponse(content={"error": "MONGO_URL environment variable is not set"}, status_code=500)
+    result = sentiment_analysis_service.get_message_for_thread(id, mongo_url, "G1")
+    return JSONResponse(content=result)
  
 @app.get("/answers", tags=["rag"])
 def get_threads_similars_for_text(request: Request, text: str, auth: dict = Depends(get_api_key)):
@@ -114,4 +126,3 @@ if __name__ == "__main__":
         port=config.PORT,
         reload=config.RELOAD)
 
- 

@@ -2,7 +2,7 @@ import json
 import os
 
 #Analyse sentiment
-from transformers import AutoTokenizer, AutoModelForSequenceClassification
+from transformers import AutoTokenizer, AutoModelForSequenceClassification # type: ignore
 import torch
 import numpy as np
 

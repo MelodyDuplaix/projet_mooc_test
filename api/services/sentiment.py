@@ -1,9 +1,9 @@
 from pymongo import MongoClient
 from transformers import AutoTokenizer, AutoModelForSequenceClassification # type: ignore
-import torch
 import numpy as np
 import os
 from dotenv import load_dotenv
+import torch
 load_dotenv()
 
 def analyse_sentiment_long_texte(texte, model_name="tabularisai/multilingual-sentiment-analysis", 
