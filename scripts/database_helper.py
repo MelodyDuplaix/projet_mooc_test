@@ -1,6 +1,9 @@
 import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dotenv import load_dotenv
 import psycopg2
+from scripts.mongo_helper import get_data_for_message
 
 load_dotenv()
 
@@ -77,7 +80,27 @@ def get_similar_documents(conn, id, limit=5):
     except Exception as e:
         print(f"Error getting similar documents: {e}")
         return []
+
+def get_all_data_similar_documents(doc_list, mongo_url, collection_name):
+    """
+    Récupère les données de tous les documents similaires à partir de la liste d'IDs.
     
+    Args:
+        doc_list: Liste d'IDs de documents similaires.
+        mongo_url: URL de connexion à MongoDB.
+        collection_name: Nom de la collection dans MongoDB.
+        
+    Returns:
+        list: Liste de données de documents similaires.
+    """
+    data_list = []
+    for doc in doc_list:
+        id = doc[0]
+        data = get_data_for_message(mongo_url, collection_name, id)
+        if data:
+            data_list.append(data)
+    return data_list
+
 if __name__ == "__main__":
     conn = connect_to_db()
     if conn:
@@ -90,6 +113,7 @@ if __name__ == "__main__":
         print(f"First document ID: {first_doc}")
         similar_docs = get_similar_documents(conn, first_doc, limit=10)
         if similar_docs:
+            similar_docs = get_all_data_similar_documents(similar_docs, os.getenv("MONGO_URL"), "G1")
             print(f"Found {len(similar_docs)} similar documents.")
             for doc in similar_docs:
                 print(doc)
