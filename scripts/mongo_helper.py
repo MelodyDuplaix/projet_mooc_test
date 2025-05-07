@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 load_dotenv()
 
-def get_data_for_message(mongo_url, collection_name, id):
+def get_data_for_thread(mongo_url, collection_name, id):
     """
     Récupère les données d'un message à partir de son ID.
     
@@ -25,5 +25,5 @@ if __name__ == "__main__":
         raise ValueError("MONGO_URL environment variable is not set")
     collection_name = "G1"
     id = "52ef4b71ab137b00720007d4"
-    data = get_data_for_message(mongo_url=mongo_url, collection_name=collection_name, id=id)
+    data = get_data_for_thread(mongo_url=mongo_url, collection_name=collection_name, id=id)
     print(data)

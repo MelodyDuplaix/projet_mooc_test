@@ -3,7 +3,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from dotenv import load_dotenv
 import psycopg2
-from scripts.mongo_helper import get_data_for_message
+from scripts.mongo_helper import get_data_for_thread
 
 load_dotenv()
 
@@ -83,7 +83,7 @@ def get_similar_documents(conn, id, limit=5):
 
 def get_all_data_similar_documents(doc_list, mongo_url, collection_name):
     """
-    Récupère les données de tous les documents similaires à partir de la liste d'IDs.
+    Récupère les données de tous les messages similaires à partir de la liste d'IDs, et récupère le thread si c'est un message.
     
     Args:
         doc_list: Liste d'IDs de documents similaires.
@@ -94,35 +94,44 @@ def get_all_data_similar_documents(doc_list, mongo_url, collection_name):
         list: Liste de données de documents similaires.
     """
     data_list = []
+    seen = set()  # Ensemble pour suivre les combinaisons uniques (id, title)
+    
     for doc in doc_list:
         id = doc[0]
         simalarity_score = doc[2]
-        data = get_data_for_message(mongo_url, collection_name, id)
-        data["similarity_score"] = simalarity_score
-        if data and data.get("title",False):
-            data_list.append(data)
+        data = get_data_for_thread(mongo_url, collection_name, id)
+        if data:
+            data["similarity_score"] = simalarity_score
+            unique_key = (data.get("id"), data.get("title"))
+            
+            if unique_key not in seen:
+                seen.add(unique_key)
+                if not data.get("title", False):
+                    thread_id = data.get("thread_id", None)
+                    thread_data = get_data_for_thread(mongo_url, collection_name, thread_id)
+                    if thread_data:
+                        thread_data["similarity_score"] = simalarity_score
+                        thread_unique_key = (thread_data.get("id"), thread_data.get("title"))
+                        if thread_unique_key not in seen:
+                            seen.add(thread_unique_key)
+                            data_list.append(thread_data)
+                else:
+                    data_list.append(data)
     return data_list
 
 if __name__ == "__main__":
     conn = connect_to_db()
     if conn:
-        vectors = get_all_vectors_from_db(conn)
-        if vectors:
-            print(f"Fetched {len(vectors)} vectors from the database.")
-        else:
-            print("No vectors found in the database.")
-        first_doc = vectors[0][0] if vectors else None
-        print(f"First document ID: {first_doc}")
+        first_doc = "52ef565b4b4451380f0008b2"
+        print(f"First message ID: {first_doc}")
         similar_docs = get_similar_documents(conn, first_doc, limit=10)
-        for doc in similar_docs:
-            print(f"Document ID: {doc[0]}, Similarity: {doc[2]}")
         if similar_docs:
             similar_docs = get_all_data_similar_documents(similar_docs, os.getenv("MONGO_URL"), "G1")
-            print(f"Found {len(similar_docs)} similar documents.")
+            print(f"Found {len(similar_docs)} similar message.")
             for doc in similar_docs:
-                print(doc)
+                print(doc["id"], doc["similarity_score"], doc["title"], doc["body"][:100])
         else:
-            print("No similar documents found.")
+            print("No similar messages found.")
         conn.close()
     else:
         print("Failed to connect to the database.")
