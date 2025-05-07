@@ -5,3 +5,5 @@ seaborn
 matplotlib
 plotly
 transformers
+fastapi
+uvicorn
