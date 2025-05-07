@@ -97,21 +97,30 @@ def get_message_for_thread(id: str, mongo_url: str, collec_name: str):
     client = MongoClient(mongo_url)
     messages = client[collec_name]["threads"].find({"_id": id})
     messages_list = []
+
     for message in messages:
-        messages_list.append(message["content"]["body"])
-        message = message["content"]
-        if "children" in message:
-            for child in message["children"]:
-                messages_list.append(child["body"])
+        message_data = {key: value for key, value in message.items() if key != "content"}
+        message_data["content"] = {key: value for key, value in message["content"].items() if key != "children"}
+        messages_list.append(message_data)
+
+        if "children" in message["content"]:
+            for child in message["content"]["children"]:
+                messages_list.append(child)
+
     print(f"Nombre de messages : {len(messages_list)}")
     result_list = []
+    print(messages_list)
+
     for message in messages_list:
-        result = analyse_sentiment_long_texte(message)
+        body = message["body"] if "body" in message else message.get("content", {}).get("body", "")
+        result = analyse_sentiment_long_texte(body)
+
         result_list.append({
             "message": message,
             "label": result["label"],
             "score": result["score"]
         })
+
     return result_list
     
 if __name__ == "__main__":
