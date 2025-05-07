@@ -1,9 +1,9 @@
 import os
 import sys
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from dotenv import load_dotenv
 import psycopg2
-from scripts.mongo_helper import get_data_for_thread
+from api.services.mongo_helper import get_data_for_thread
 import csv
 from datetime import datetime
 
