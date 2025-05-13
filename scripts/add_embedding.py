@@ -29,11 +29,11 @@ model_multilingue = SentenceTransformer('paraphrase-multilingual-MiniLM-L12-v2')
 def base_postgres(requete, params=None, fetch_results=False):
     # Étape 1: Connexion à PostgreSQL
     # Récupération des variables d'environnement
-    DB_HOST = os.getenv("DB_HOST")
-    DB_PORT = os.getenv("DB_PORT")
-    DB_USER = os.getenv("DB_USER")
-    DB_PASSWORD = os.getenv("DB_PASSWORD")
-    DB_NAME = os.getenv("DB_NAME")
+    DB_HOST = os.getenv("DB_HOST_local")
+    DB_PORT = os.getenv("DB_PORT_local")
+    DB_USER = os.getenv("DB_USER_local")
+    DB_PASSWORD = os.getenv("DB_PASSWORD_local")
+    DB_NAME = os.getenv("DB_NAME_local")
     conn = None
     cursor = None
     results = None
@@ -42,7 +42,7 @@ def base_postgres(requete, params=None, fetch_results=False):
         # Connexion à la base de données par défaut
         conn = psycopg2.connect(
             host=DB_HOST,
-            port=DB_PORT,
+            port=int(DB_PORT),  # Convertir le port en entier
             user=DB_USER,
             password=DB_PASSWORD,
             database=DB_NAME
@@ -73,6 +73,15 @@ def connexion_mongodb():
     MONGO_URL = os.getenv("MONGO_URL")
     client = MongoClient(MONGO_URL)
     return client
+
+def create_embedding_table():
+    requete = """
+    CREATE TABLE IF NOT EXISTS embedding (
+        id TEXT PRIMARY KEY,
+        vector vector(384)
+    );
+    """
+    base_postgres(requete)
 
 def add_embedding():
     client = connexion_mongodb()
