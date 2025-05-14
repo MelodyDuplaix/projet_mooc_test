@@ -69,8 +69,13 @@ def base_postgres(requete, params=None, fetch_results=False):
     
     return results
 
-def connexion_mongodb():
-    MONGO_URL = os.getenv("MONGO_URL")
+def connexion_mongodb_local():
+    MONGO_URL = os.getenv("MONGO_URL_LOCAL")
+    client = MongoClient(MONGO_URL)
+    return client
+
+def connexion_mongodb_distant():
+    MONGO_URL = os.getenv("MONGO_URL_DIS")
     client = MongoClient(MONGO_URL)
     return client
 
@@ -84,7 +89,7 @@ def create_embedding_table():
     base_postgres(requete)
 
 def add_embedding():
-    client = connexion_mongodb()
+    client = connexion_mongodb_local()
     # Utiliser une taille de lot appropriée
     batch_size = 1000
     
@@ -102,7 +107,7 @@ def add_embedding():
         print(f"Erreur lors de la récupération des IDs existants: {e}")
     
     # Récupérer le nombre total de documents
-    total_docs = client['G1']['documents'].count_documents({})
+    total_docs = client['mooc']['documents'].count_documents({}) # Changer en "G1" si on veut traiter les documents de la base de données distantes
     # Calculer le nombre de documents restants à traiter
     remaining_docs = total_docs - len(existing_ids)
     
@@ -123,7 +128,7 @@ def add_embedding():
         while processed < remaining_docs:
             try:
                 # Récupérer un lot de documents avec pagination
-                cursor = client['G1']['documents'].find().skip(skip).limit(batch_size)
+                cursor = client['mooc']['documents'].find().skip(skip).limit(batch_size) # Changer en "G1" si on veut traiter les documents de la base de données distantes
                 batch_docs = list(cursor)  # Convertir en liste pour éviter les problèmes de timeout
                 
                 if not batch_docs:
