@@ -37,7 +37,7 @@ def connect_to_db():
         print(f"Error connecting to the database: {e}")
         return None
     
-def get_all_vectors_from_db(conn):
+def get_all_vectors_from_db(conn, limit=10000000000):
     """
     Récupère tous les vecteurs de la base de données.
     
@@ -49,7 +49,7 @@ def get_all_vectors_from_db(conn):
     """
     try:
         cursor = conn.cursor()
-        cursor.execute("SELECT * FROM embedding")
+        cursor.execute("SELECT * FROM embedding LIMIT %s;", (limit,))
         vectors = cursor.fetchall()
         return vectors
     except Exception as e:
