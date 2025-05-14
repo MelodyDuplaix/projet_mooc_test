@@ -1,3 +1,4 @@
+from typing import Dict
 from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -7,6 +8,8 @@ from fastapi.responses import FileResponse
 import os
 import sys
 from datetime import datetime
+
+from regex import D
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from api.services import embedding
 from api.services.auth import get_api_key
@@ -24,7 +27,21 @@ app = FastAPI(
     description="API pour analyser les threads et messages des forums de discussion des moocs de fun mooc",
     version="0.1.0",
     docs_url="/docs",
-    redoc_url="/redoc"
+    redoc_url="/redoc",
+    openapi_tags=[
+        {
+            "name": "Analyse de sentiments",
+            "description": "Analyse de sentiments des messages et threads.",
+        },
+        {
+            "name": "rag",
+            "description": "Récupération de documents similaires.",
+        },
+        {
+            "name": "check",
+            "description": "Vérification de l'état du service.",
+        },
+    ]
 )
 
 # Mount static files from the templates folder
@@ -44,12 +61,16 @@ app.add_middleware(
 )
 
 
-@app.get("/", tags=["check"])
+@app.get("/", tags=["check"], summary="Vérification de l'api", description="Route pour vérifier que l'api est en ligne.", 
+         responses={200: {"description": "L'api est en ligne."}, 500: {"description": "L'api n'est pas en ligne."}}, 
+         response_model=Dict[str, str])
 async def periodic_update(request: Request, auth: dict = Depends(get_api_key)):
     return JSONResponse(content={"message": "Hello World!"})
 
 
-@app.get(f"/similars", tags=["rag"])
+@app.get(f"/similars", tags=["rag"], summary="Récupération de documents similaires", description="Route qui permet de récupérer les messages similaires à un message donné.", 
+         responses={200: {"description": "Les messages similaires ont été récupérés avec succès."}, 404: {"description": "Aucun message similaire trouvé."}, 500: {"description": "Erreur lors de la récupération des messages similaires."}},
+         response_model=Dict[str, str])
 async def get_similars_for_tread(request: Request, id: str, auth: dict = Depends(get_api_key)):
     """
     Get the similar messages for a given thread ID.
@@ -75,7 +96,9 @@ async def get_similars_for_tread(request: Request, id: str, auth: dict = Depends
     else:
         return JSONResponse(content={"error": "Failed to connect to the database."}, status_code=500)
     
-@app.post("/thread_sentiment", tags=["Analyse de sentiments"])
+@app.post("/thread_sentiment", tags=["Analyse de sentiments"], summary="Analyse de sentiments des threads", description="Route qui permet d'obtenir les résultats de l'analyse de sentiment d'un thread précis.", 
+          responses={200: {"description": "Analyse de sentiment réussie."}, 500: {"description": "Erreur lors de l'analyse de sentiment."}},
+          response_model=Dict[str, str])
 async def analyse_thread_sentiment(request: Request, id:str, auth: dict = Depends(get_api_key)):
 
     mongo_url = os.getenv("MONGO_URL")
@@ -84,7 +107,9 @@ async def analyse_thread_sentiment(request: Request, id:str, auth: dict = Depend
     result = sentiment_analysis_service.get_message_for_thread(id, mongo_url, "G1")
     return JSONResponse(content=result)
  
-@app.get("/answers", tags=["rag"])
+@app.get("/answers", tags=["rag"], summary="Récupération de documents par rapport à une question", description="Route qui permet de récupérer les threads ayant des messages similaires à une question.", 
+         responses={200: {"description": "Les messages similaires ont été récupérés avec succès."}, 404: {"description": "Aucun message similaire trouvé."}, 500: {"description": "Erreur lors de la récupération des messages similaires."}}, 
+         response_model=Dict[str, str])
 def get_threads_similars_for_text(request: Request, text: str, auth: dict = Depends(get_api_key)):
     """
     Get the similar messages for a given text.
