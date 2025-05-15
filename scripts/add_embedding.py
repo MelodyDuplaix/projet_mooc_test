@@ -79,15 +79,6 @@ def connexion_mongodb_distant():
     client = MongoClient(MONGO_URL)
     return client
 
-def create_embedding_table():
-    requete = """
-    CREATE TABLE IF NOT EXISTS embedding (
-        id TEXT PRIMARY KEY,
-        vector vector(384)
-    );
-    """
-    base_postgres(requete)
-
 def add_embedding():
     client = connexion_mongodb_local()
     # Utiliser une taille de lot appropriée
@@ -177,6 +168,16 @@ def add_embedding():
                 time.sleep(2)
         
         print(f"Traitement terminé: {processed} nouveaux documents traités")
+        
+
+
+def add_text_with_id():
+    client = connexion_mongodb_local()
+    cursor = client['mooc']['documents'].find()
+    for doc in cursor:
+        requete = "UPDATE documents SET text = %s WHERE id = %s"
+        base_postgres(requete, (doc.get("body", ""), doc.get("id", "")))
+        
 
 if __name__ == "__main__":
     add_embedding()
