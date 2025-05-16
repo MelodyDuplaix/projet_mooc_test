@@ -16,7 +16,7 @@ import sys
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from api.services.database_helper import get_all_vectors_from_db, connect_to_db
 
-MODEL_PICKLE_PATH = "model_bertopic.pkl"
+MODEL_PICKLE_PATH = "data/model_bertopic.pkl"
 
 def get_filtered_threads():
     load_dotenv()
