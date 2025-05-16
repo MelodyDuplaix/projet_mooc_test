@@ -184,3 +184,5 @@ test_mongo.ipynb
 __pycache__/
 data/MOOC_forum.json
 notes.md
+data/*
+notebooks/embedding.csv
