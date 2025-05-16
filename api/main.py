@@ -110,13 +110,14 @@ async def analyse_thread_sentiment(request: Request, id:str, auth: dict = Depend
 @app.get("/answers", tags=["rag"], summary="Récupération de documents par rapport à une question", description="Route qui permet de récupérer les threads ayant des messages similaires à une question.", 
          responses={200: {"description": "Les messages similaires ont été récupérés avec succès."}, 404: {"description": "Aucun message similaire trouvé."}, 500: {"description": "Erreur lors de la récupération des messages similaires."}}, 
          response_model=Dict[str, str])
-def get_threads_similars_for_text(request: Request, text: str, auth: dict = Depends(get_api_key)):
+def get_threads_similars_for_text(request: Request, text: str, course_name: str, auth: dict = Depends(get_api_key)):
     """
     Get the similar messages for a given text.
 
     Args:
         request (Request): the request object.
         text (str): the text to search for similar messages.
+        course_name (str): the course name to search for similar messages.
         auth (dict, optional): the authentication information. Defaults to Depends(get_api_key).
 
     Returns:
@@ -127,7 +128,7 @@ def get_threads_similars_for_text(request: Request, text: str, auth: dict = Depe
     if conn:
         vector = embedding_message(text)
         if vector:
-            similar_docs = get_similars_messages_from_vector(conn, vector, limit=10)
+            similar_docs = get_similars_messages_from_vector(conn, vector, limit=10, course_name=course_name)
             if similar_docs:
                 similar_docs = get_all_data_similar_documents(similar_docs, os.getenv("MONGO_URL"), "G1", conn)
                 conn.close()  
