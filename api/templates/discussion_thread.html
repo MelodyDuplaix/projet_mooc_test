@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Analyse du thread - FUN MOOC</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="dashboard-thread" style="background: #fff;">
+        <h1 style="color: #1873b7; background: none;">Fil de discussion</h1>
+        <p class="sujet-principal"><strong>Sujet :</strong> {{ thread.titre }}</p>
+        <ul class="messages-thread">
+            {% for msg in thread.messages %}
+            <li>
+                <strong>{{ msg.auteur }}</strong> : {{ msg.texte }}<br>
+                <span class="langue">Langue : {{ msg.langue }} {{ get_flag(msg.langue) }}</span><br>
+                <span class="sentiment sentiment-{{ msg.sentiment|lower|replace(' ', '-')|replace('é', 'e')|replace('è', 'e')|replace('ê', 'e')|replace('à', 'a') }}">
+                    Sentiment : {{ msg.sentiment }}
+                    {% if msg.sentiment == 'Très positif' %} ⭐{% endif %}
+                    {% if msg.sentiment == 'Très négatif' %} ⚠️{% endif %}
+                </span>
+            </li>
+            {% endfor %}
+        </ul>
+        <div class="resume-sentiments">
+            <span>Très positifs : {{ nb_tres_positif }}</span> |
+            <span>Positifs : {{ nb_positif }}</span> |
+            <span>Neutres : {{ nb_neutre }}</span> |
+            <span>Négatifs : {{ nb_negatif }}</span> |
+            <span>Très négatifs : {{ nb_tres_negatif }}</span> |
+            <span>Langues détectées : {{ langues|join(', ') }}</span>
+        </div>
+        <a href="/recherche">Retour à la recherche</a> | <a href="/">Accueil</a>
+    </div>
+</body>
+</html> 

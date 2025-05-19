@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Recherche de threads - FUN MOOC</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="dashboard-thread">
+        <h1 style="color: #1873b7; background: none;">Poser une question</h1>
+        <form method="post" style="display: flex; flex-direction: column; align-items: center; gap: 1em; max-width: 400px; margin: 0 auto 2em auto; background: none;">
+            <label for="question" style="font-weight: bold; color: #2c3e50;">Posez votre question ou recherche :</label>
+            <input type="text" id="question" name="question" required style="padding: 0.5em 1em; border-radius: 6px; border: 1px solid #b2bec3; width: 100%; font-size: 1.1em; background: #fff; color: #2c3e50;">
+            <button type="submit" style="background: #1873b7; color: #fff; border: none; border-radius: 6px; padding: 0.6em 2em; font-size: 1.1em; font-weight: bold; cursor: pointer; transition: background 0.2s;">Rechercher</button>
+        </form>
+        {% if reponse %}
+            <div class="sujet-principal" style="margin-top: 24px; text-align: center;">
+                <strong>Réponse :</strong> {{ reponse }}
+            </div>
+        {% endif %}
+        <div style="text-align: center; margin-top: 2em;">
+            <a href="/">Retour à l'accueil</a>
+        </div>
+    </div>
+</body>
+</html> 

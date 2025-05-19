@@ -1,22 +1,23 @@
-from fastapi import FastAPI, Request, Depends, HTTPException
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI, Request, Depends, HTTPException, Form
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
-
+from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
 import os
 import sys
 from datetime import datetime
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from api.services import embedding
+# from api.services import embedding # Commented out as embedding is imported inside a function in endpoints.py
 from api.services.auth import get_api_key
 import config
-from api.services.database_helper import connect_to_db, get_all_vectors_from_db, get_similar_documents, get_all_data_similar_documents, get_similars_messages_from_vector
-from api.services.mongo_helper import get_data_for_thread
-from api.services import sentiment as sentiment_analysis_service  # Import with a more descriptive alias
+# from api.services.database_helper import connect_to_db, get_all_vectors_from_db, get_similar_documents, get_all_data_similar_documents, get_similars_messages_from_vector # Commented out as these are used in endpoints.py
+# from api.services.mongo_helper import get_data_for_thread # Not used in the provided code snippets
+# from api.services import sentiment as sentiment_analysis_service  # Import with a more descriptive alias # Used in endpoints.py
 from pydantic import BaseModel
 
-
+# Import the router from the endpoints file
+from api.routers.endpoints import router
 
 # Create FastAPI app
 app = FastAPI(
@@ -28,8 +29,7 @@ app = FastAPI(
 )
 
 # Mount static files from the templates folder
-#app.mount("/static", StaticFiles(directory="app/templates",
-#          html=True), name="static")
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 
 #app.mount("/assets", StaticFiles(directory="app/templates/assets",
 #          html=True), name="assets")
@@ -43,79 +43,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 
-@app.get("/", tags=["check"])
-async def periodic_update(request: Request, auth: dict = Depends(get_api_key)):
-    return JSONResponse(content={"message": "Hello World!"})
-
-
-@app.get(f"/similars", tags=["rag"])
-async def get_similars_for_tread(request: Request, id: str, auth: dict = Depends(get_api_key)):
-    """
-    Get the similar messages for a given thread ID.
-
-    Args:
-        request (Request): the request object.
-        id (str): the thread ID to search for similar messages.
-        auth (dict, optional): the authentication information. Defaults to Depends(get_api_key).
-
-    Returns:
-        JsonReponse: a JSON response containing an eventual error message and the data containing the similar messages and their similarity scores.
-    """
-    conn = connect_to_db()
-    if conn:
-        similar_docs = get_similar_documents(conn, id, limit=10)
-        if similar_docs:
-            similar_docs = get_all_data_similar_documents(similar_docs, os.getenv("MONGO_URL"), "G1", conn)
-            conn.close()  
-            return JSONResponse(content={"error": None, "data": similar_docs}, status_code=200)
-        else:
-            conn.close()  
-            return JSONResponse(content={"error": "No similar messages found."}, status_code=404)  
-    else:
-        return JSONResponse(content={"error": "Failed to connect to the database."}, status_code=500)
-    
-@app.post("/thread_sentiment", tags=["Analyse de sentiments"])
-async def analyse_thread_sentiment(request: Request, id:str, auth: dict = Depends(get_api_key)):
-
-    mongo_url = os.getenv("MONGO_URL")
-    if not mongo_url:
-        return JSONResponse(content={"error": "MONGO_URL environment variable is not set"}, status_code=500)
-    result = sentiment_analysis_service.get_message_for_thread(id, mongo_url, "G1")
-    return JSONResponse(content=result)
- 
-@app.get("/answers", tags=["rag"])
-def get_threads_similars_for_text(request: Request, text: str, auth: dict = Depends(get_api_key)):
-    """
-    Get the similar messages for a given text.
-
-    Args:
-        request (Request): the request object.
-        text (str): the text to search for similar messages.
-        auth (dict, optional): the authentication information. Defaults to Depends(get_api_key).
-
-    Returns:
-        JsonReponse: a JSON response containing an eventual error message and the data containing the similar messages and their similarity scores.
-    """
-    from api.services.embedding import embedding_message
-    conn = connect_to_db()
-    if conn:
-        vector = embedding_message(text)
-        if vector:
-            similar_docs = get_similars_messages_from_vector(conn, vector, limit=10)
-            if similar_docs:
-                similar_docs = get_all_data_similar_documents(similar_docs, os.getenv("MONGO_URL"), "G1", conn)
-                conn.close()  
-                return JSONResponse(content={"error": None, "data": similar_docs}, status_code=200)
-            else:
-                conn.close()  
-                return JSONResponse(content={"error": "No similar messages found."}, status_code=404)  
-        else:
-            conn.close()  
-            return JSONResponse(content={"error": "Failed to create embedding."}, status_code=500)
-        
-    else:
-        return JSONResponse(content={"error": "Failed to connect to the database."}, status_code=500)
+# Include the router from api.routers.endpoints
+app.include_router(router)
 
 
 if __name__ == "__main__":

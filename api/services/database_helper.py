@@ -70,9 +70,26 @@ def get_similar_documents(conn, id, limit=5):
     """
     try:
         query = """
-        SELECT id, vector, 1 - (vector <=> (SELECT vector FROM embedding e2 WHERE id = %s)) AS similarity
-        FROM embedding e 
-        WHERE id != %s
+        WITH reference AS (
+            SELECT 
+                e.vector AS ref_vector,
+                c.name AS course_name
+            FROM embedding e
+            JOIN threads t ON t.id = e.id
+            JOIN courses c ON c.id = t.course_id
+            WHERE e.id = %s
+        )
+        SELECT 
+            e.id,
+            e.vector,
+            1 - (e.vector <=> r.ref_vector) AS similarity,
+            c.name
+        FROM embedding e
+        LEFT JOIN threads t1 ON t1.id = e.id
+        LEFT JOIN threads t2 ON t2.id = e.thread_id
+        LEFT JOIN courses c ON c.id = COALESCE(t1.course_id, t2.course_id)
+        JOIN reference r ON c.name = r.course_name
+        WHERE e.id != %s
         ORDER BY similarity DESC
         LIMIT %s;
         """
@@ -83,28 +100,52 @@ def get_similar_documents(conn, id, limit=5):
         print(f"Error getting similar documents: {e}")
         return []
     
-def get_similars_messages_from_vector(conn, vector, limit=5):
+def get_similars_messages_from_vector(conn, vector, limit=5, course_name=None):
     """
-    Récupère les messages similaires à un vecteur donné.
+    Récupère les messages (ou threads) similaires à un vecteur donné, avec ou sans filtrage par cours.
     
     Args:
-        conn: Connection à la base de données.
+        conn: Connexion à la base de données.
         vector: Vecteur à comparer.
-        limit: Nombre de messages similaires à récupérer.
+        limit: Nombre d'éléments similaires à récupérer.
+        course_name: Nom du cours (optionnel). Si None, cherche dans tous les cours.
         
     Returns:
-        list: Liste de messages similaires.
+        list: Liste d'éléments similaires.
     """
     try:
         print(vector)
-        query = """
-        SELECT id, vector, 1 - (vector <=> %s::vector) AS similarity
-        FROM embedding e
+        
+        # Clause WHERE dynamique
+        where_clause = "WHERE c.name = %s" if course_name else ""
+        
+        query = f"""
+        WITH embeddings_with_course AS (
+            SELECT 
+                e.id,
+                e.vector,
+                c.name AS course_name
+            FROM embedding e
+            LEFT JOIN threads t1 ON t1.id = e.id
+            LEFT JOIN threads t2 ON t2.id = e.thread_id
+            LEFT JOIN courses c ON c.id = COALESCE(t1.course_id, t2.course_id)
+            {where_clause}
+        )
+        SELECT 
+            id,
+            vector,
+            1 - (vector <=> %s::vector) AS similarity
+        FROM embeddings_with_course
         ORDER BY similarity DESC
         LIMIT %s;
         """
+        
         cursor = conn.cursor()
-        cursor.execute(query, (vector, limit))
+        if course_name:
+            cursor.execute(query, (course_name, vector, limit))
+        else:
+            cursor.execute(query, (vector, limit))
+        
         return cursor.fetchall()
     except Exception as e:
         print(f"Error getting similar messages: {e}")
@@ -177,7 +218,7 @@ def get_all_data_similar_documents(doc_list, mongo_url, collection_name, conn):
 if __name__ == "__main__":
     conn = connect_to_db()
     if conn:
-        first_doc = "52ef565b4b4451380f0008b2"
+        first_doc = "57458c6954ecc0b0c30001d6"
         print(f"First message ID: {first_doc}")
         similar_docs = get_similar_documents(conn, first_doc, limit=10)
         if similar_docs:
@@ -185,7 +226,7 @@ if __name__ == "__main__":
             print(f"Found {len(similar_docs)} similar message.")
             for doc in similar_docs:
                 print(doc["id"], doc["similarity_score"], doc["title"], doc.get("similar_messages", []))
-            csv_file = f"data/similar_messages_{first_doc}.csv"
+            csv_file = f"data/similar_messages.csv"
             with open(csv_file, mode='a', newline='', encoding='utf-8') as file:
                 writer = csv.writer(file)
                 for doc in similar_docs:
