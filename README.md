@@ -41,4 +41,13 @@ Les données utilisées proviennent d'extractions de forums de MOOC, anciennes e
 
 ## Installation
 
+## Dashboard clustering:
 
+- kpi:
+  - total topic
+  - total messages
+  - nb moyen message par topic
+  - nb median message par topic
+- table paginé des topics (id, nom, mots clés, nombre de message), avec recherche et filtre et tris
+- histogramme des top 20 topics par nombre de messages
+- sélecteur de topic (dropdown ou autocomplete) pour explorer un topic , avec affichage des messages pour le topic, et filtre et recherche

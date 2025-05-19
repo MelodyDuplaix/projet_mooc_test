@@ -2,6 +2,7 @@ from typing import Dict
 from fastapi import FastAPI, Request, Depends, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+import pandas as pd
 
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -18,6 +19,8 @@ from api.services.database_helper import connect_to_db, get_all_vectors_from_db,
 from api.services.mongo_helper import get_data_for_thread
 from api.services import sentiment as sentiment_analysis_service  # Import with a more descriptive alias
 from pydantic import BaseModel
+from api.services import clustering_module
+
 
 
 
@@ -110,7 +113,7 @@ async def analyse_thread_sentiment(request: Request, id:str, auth: dict = Depend
 @app.get("/answers", tags=["rag"], summary="Récupération de documents par rapport à une question", description="Route qui permet de récupérer les threads ayant des messages similaires à une question.", 
          responses={200: {"description": "Les messages similaires ont été récupérés avec succès."}, 404: {"description": "Aucun message similaire trouvé."}, 500: {"description": "Erreur lors de la récupération des messages similaires."}}, 
          response_model=Dict[str, str])
-def get_threads_similars_for_text(request: Request, text: str, course_name: str, auth: dict = Depends(get_api_key)):
+def get_threads_similars_for_text(request: Request, text: str, course_name: str | None, auth: dict = Depends(get_api_key)):
     """
     Get the similar messages for a given text.
 
@@ -144,6 +147,43 @@ def get_threads_similars_for_text(request: Request, text: str, course_name: str,
         return JSONResponse(content={"error": "Failed to connect to the database."}, status_code=500)
 
 
+@app.get("/clustering/all", tags=["clustering"], summary="Récupération de toutes les données de clustering", description="Route qui permet de récupérer toutes les données de clustering.", response_model=Dict[str, str])
+async def get_all_clustering_data(request: Request, auth: dict = Depends(get_api_key)):
+    data = clustering_module.get_all_data()
+    if data:
+        def convert_dataframes_to_dicts(data):
+            if isinstance(data, dict):
+                return {k: convert_dataframes_to_dicts(v) for k, v in data.items()}
+            elif isinstance(data, pd.DataFrame):
+                return data.to_dict(orient='records')
+            elif isinstance(data, list):
+                return [convert_dataframes_to_dicts(item) for item in data]
+            else:
+                return data
+        return JSONResponse(content=convert_dataframes_to_dicts(data))
+    else:
+        return JSONResponse(content={"error": "No clustering data found."}, status_code=404)
+
+@app.get("/clustering/stats", tags=["clustering"], summary="Récupération des statistiques de clustering", description="Route qui permet de récupérer les statistiques de clustering.", response_model=Dict[str, str])
+async def get_clustering_stats(request: Request, auth: dict = Depends(get_api_key)):
+    stats = clustering_module.get_stats()
+    return JSONResponse(content=stats)
+
+@app.get("/clustering/topics", tags=["clustering"], summary="Récupération du tableau des topics", description="Route qui permet de récupérer le tableau des topics.", response_model=Dict[str, str])
+async def get_clustering_table(request: Request, auth: dict = Depends(get_api_key)):
+    table = clustering_module.get_topics_table()
+    return JSONResponse(content=table)
+
+@app.get("/clustering/topic_details/{topic_id}", tags=["clustering"], summary="Récupération des détails d'un topic", description="Route qui permet de récupérer les détails d'un topic.", response_model=Dict[str, str])
+async def get_clustering_topic_details(request: Request, topic_id: int, auth: dict = Depends(get_api_key)):
+    details = clustering_module.get_topic_details(topic_id)
+    return JSONResponse(content=details)
+
+@app.post("/clustering/force_reload", tags=["clustering"], summary="Forcer le rechargement des données de clustering", description="Route qui permet de forcer le rechargement des données de clustering.", response_model=Dict[str, str])
+async def force_reload_clustering_data(request: Request, auth: dict = Depends(get_api_key)):
+    clustering_module.force_reload()
+    return JSONResponse(content={"message": "Données de clustering rechargées avec succès."})
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(
@@ -151,4 +191,3 @@ if __name__ == "__main__":
         host=config.HOST,
         port=config.PORT,
         reload=config.RELOAD)
-
