@@ -173,6 +173,7 @@ cython_debug/
 # PyPI configuration file
 .pypirc
 
+data/
 data/doc_embed.csv
 data/embedding_202505140903.csv
 data/embedding_202505141217.csv
