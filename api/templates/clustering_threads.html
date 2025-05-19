@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Clustering des fils de discussion - FUN MOOC</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="dashboard-thread">
+        <h1 style="color: #1873b7;">Regroupement des fils de discussion</h1>
+    </div>
+    <ul>
+        {% for cluster in clusters %}
+        <li>
+            <strong>{{ cluster.nom }}</strong> :
+            <ul>
+                {% for thread in cluster.threads %}
+                <li>{{ thread }}</li>
+                {% endfor %}
+            </ul>
+        </li>
+        {% endfor %}
+    </ul>
+    <a href="/">Accueil</a>
+</body>
+</html> 

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Résultats de la recherche - FUN MOOC</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Résultats pour : "{{ question }}"</h1>
+    {% if resultats %}
+        <ul>
+        {% for thread in resultats %}
+            <li><a href="/thread/{{ thread.id }}">{{ thread.titre }}</a></li>
+        {% endfor %}
+        </ul>
+    {% else %}
+        <p>Aucun fil de discussion trouvé.</p>
+    {% endif %}
+    <a href="/question">Nouvelle recherche</a> | <a href="/">Accueil</a>
+</body>
+</html> 

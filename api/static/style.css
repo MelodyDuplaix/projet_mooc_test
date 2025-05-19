@@ -1,0 +1,244 @@
+body.fond-bleu {
+    background: #1873b7;
+    color: #fff;
+    min-height: 100vh;
+    margin: 0;
+    padding: 0;
+}
+
+.logo-funmooc {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1em;
+    justify-content: center;
+    margin-top: 2em;
+}
+
+.fun-circle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 90px;
+    height: 90px;
+    background: #1873b7;
+    color: #fff;
+    font-size: 2.2em;
+    font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+    border-radius: 50%;
+    font-weight: bold;
+    margin-right: -20px;
+    border: 8px solid #fff;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.15);
+    letter-spacing: 2px;
+}
+
+.mooc-text {
+    font-size: 3.5em;
+    font-family: 'Arial Rounded MT Bold', Arial, sans-serif;
+    color: #1873b7;
+    font-weight: bold;
+    background: #fff;
+    padding: 0 20px 0 30px;
+    border-radius: 0 50px 50px 0 / 0 50px 50px 0;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    border: 8px solid #fff;
+    text-shadow: 2px 2px 0 #1873b7, 4px 4px 8px rgba(0,0,0,0.10);
+    letter-spacing: 4px;
+}
+
+nav {
+    text-align: center;
+    margin-bottom: 2em;
+}
+
+nav a {
+    color: #111;
+    text-decoration: none;
+    font-weight: bold;
+    margin: 0 1em;
+    font-size: 1.2em;
+    background: #fff;
+    padding: 0.3em 1em;
+    border-radius: 8px;
+    transition: background 0.2s, color 0.2s;
+}
+nav a:hover {
+    text-decoration: underline;
+    color: #1873b7;
+    background: #e0e0e0;
+}
+
+p {
+    text-align: center;
+    color: #111;
+    font-size: 1.1em;
+    margin-top: 0.5em;
+    background: #fff;
+    display: inline-block;
+    padding: 0.5em 2em;
+    border-radius: 8px;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    margin-bottom: 2em;
+}
+
+/* Centrer le paragraphe sous le titre */
+.bloc-explication {
+    width: 100%;
+    text-align: center;
+}
+
+h1 {
+    background: none;
+    color: #7b8a97;
+    border: 2.5px solid #7b8a97;
+    border-radius: 10px;
+    padding: 0.5em 1.5em;
+    margin: 0 auto 1em auto;
+    text-align: center;
+    font-size: 2.2em;
+    letter-spacing: 2px;
+    box-shadow: none;
+    display: block;
+    width: fit-content;
+}
+
+.bandeau-titre {
+    background: #1873b7;
+    border-radius: 16px;
+    margin: 0 auto 2em auto;
+    padding: 1.5em 0.5em 1em 0.5em;
+    width: 80%;
+    box-shadow: none;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    border: none;
+}
+
+.bandeau-titre h1 {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    color: #fff !important;
+    margin: 0;
+    padding: 0.5em 0;
+    border-radius: 0;
+    width: 100%;
+    display: block;
+}
+
+.sous-titre {
+    display: block;
+    color: #fff;
+    font-size: 0.75em;
+    font-weight: normal;
+    margin-top: 0.4em;
+    letter-spacing: normal;
+}
+
+/* Amélioration esthétique de la section fil de discussion */
+.dashboard-thread {
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 12px 36px rgba(44,62,80,0.28), 0 3px 12px rgba(44,62,80,0.18);
+    border: 2.5px solid #b2bec3;
+    padding: 32px 32px 24px 32px;
+    max-width: 800px;
+    margin: 40px auto;
+}
+
+.sujet-principal {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #2c3e50;
+    background: #eaf6ff;
+    border-left: 4px solid #3498db;
+    padding: 10px 16px;
+    margin-bottom: 24px;
+    border-radius: 6px;
+    box-shadow: 0 12px 36px rgba(44,62,80,0.28), 0 3px 12px rgba(44,62,80,0.18);
+    border: 2.5px solid #b2bec3;
+}
+
+ul.messages-thread {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 28px;
+}
+ul.messages-thread li {
+    background: #fff;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    padding: 16px 20px;
+    box-shadow: 0 12px 36px rgba(44,62,80,0.28), 0 3px 12px rgba(44,62,80,0.18);
+    border-left: 4px solid #b2bec3;
+    border: 2.5px solid #b2bec3;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+ul.messages-thread li:hover {
+    border-left: 4px solid #3498db;
+    background: #f0f8ff;
+    box-shadow: 0 18px 54px rgba(44,62,80,0.32), 0 6px 24px rgba(44,62,80,0.22);
+}
+
+.langue {
+    font-size: 0.95em;
+    color: #636e72;
+}
+
+.sentiment {
+    font-size: 0.95em;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-left: 6px;
+}
+.sentiment-positif {
+    background: #d4f8e8;
+    color: #218c5a;
+}
+.sentiment-tres-positif {
+    background: #145a32;
+    color: #fff;
+}
+.sentiment-neutre {
+    background: #f6e58d;
+    color: #b7950b;
+}
+.sentiment-negatif {
+    background: #ffd6d6;
+    color: #c0392b;
+}
+.sentiment-tres-negatif {
+    background: #922b21;
+    color: #fff;
+}
+
+.resume-sentiments {
+    background: #f4f8fb;
+    border-radius: 8px;
+    padding: 12px 18px;
+    margin-bottom: 18px;
+    font-size: 1.05em;
+    color: #34495e;
+    box-shadow: 0 12px 36px rgba(44,62,80,0.28), 0 3px 12px rgba(44,62,80,0.18);
+    border: 2.5px solid #b2bec3;
+}
+
+@media (max-width: 600px) {
+    .dashboard-thread {
+        padding: 12px 2vw;
+    }
+    .sujet-principal {
+        font-size: 1em;
+        padding: 8px 8px;
+    }
+    ul.messages-thread li {
+        padding: 10px 8px;
+    }
+    .resume-sentiments {
+        padding: 8px 8px;
+    }
+}

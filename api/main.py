@@ -1,28 +1,29 @@
 from typing import Dict
-from fastapi import FastAPI, Request, Depends, HTTPException
+from fastapi import FastAPI, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 import pandas as pd
 
+from fastapi import FastAPI, Request, Depends
+from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import FileResponse
 import os
 import sys
-from datetime import datetime
 
-from regex import D
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from api.services import embedding
 from api.services.auth import get_api_key
 import config
-from api.services.database_helper import connect_to_db, get_all_vectors_from_db, get_similar_documents, get_all_data_similar_documents, get_similars_messages_from_vector
+from api.services.database_helper import connect_to_db, get_all_vectors_from_db, get_similar_documents, get_all_data_similar_documents, get_similars_messages_from_vector # Commented out as these are used in endpoints.py
 from api.services.mongo_helper import get_data_for_thread
-from api.services import sentiment as sentiment_analysis_service  # Import with a more descriptive alias
-from pydantic import BaseModel
+from api.services import sentiment as sentiment_analysis_service
 from api.services import clustering_module
 
 
-
+# Import the router from the endpoints file
+from api.routers.endpoints import router
 
 # Create FastAPI app
 app = FastAPI(
@@ -48,8 +49,7 @@ app = FastAPI(
 )
 
 # Mount static files from the templates folder
-#app.mount("/static", StaticFiles(directory="app/templates",
-#          html=True), name="static")
+app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__), "static")), name="static")
 
 #app.mount("/assets", StaticFiles(directory="app/templates/assets",
 #          html=True), name="assets")
@@ -63,15 +63,16 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 
-@app.get("/", tags=["check"], summary="Vérification de l'api", description="Route pour vérifier que l'api est en ligne.", 
+@app.get("/api", tags=["check"], summary="Vérification de l'api", description="Route pour vérifier que l'api est en ligne.", 
          responses={200: {"description": "L'api est en ligne."}, 500: {"description": "L'api n'est pas en ligne."}}, 
          response_model=Dict[str, str])
 async def periodic_update(request: Request, auth: dict = Depends(get_api_key)):
     return JSONResponse(content={"message": "Hello World!"})
 
 
-@app.get(f"/similars", tags=["rag"], summary="Récupération de documents similaires", description="Route qui permet de récupérer les messages similaires à un message donné.", 
+@app.get(f"/api/similars", tags=["rag"], summary="Récupération de documents similaires", description="Route qui permet de récupérer les messages similaires à un message donné.", 
          responses={200: {"description": "Les messages similaires ont été récupérés avec succès."}, 404: {"description": "Aucun message similaire trouvé."}, 500: {"description": "Erreur lors de la récupération des messages similaires."}},
          response_model=Dict[str, str])
 async def get_similars_for_tread(request: Request, id: str, auth: dict = Depends(get_api_key)):
@@ -99,7 +100,7 @@ async def get_similars_for_tread(request: Request, id: str, auth: dict = Depends
     else:
         return JSONResponse(content={"error": "Failed to connect to the database."}, status_code=500)
     
-@app.post("/thread_sentiment", tags=["Analyse de sentiments"], summary="Analyse de sentiments des threads", description="Route qui permet d'obtenir les résultats de l'analyse de sentiment d'un thread précis.", 
+@app.post("/api/thread_sentiment", tags=["Analyse de sentiments"], summary="Analyse de sentiments des threads", description="Route qui permet d'obtenir les résultats de l'analyse de sentiment d'un thread précis.", 
           responses={200: {"description": "Analyse de sentiment réussie."}, 500: {"description": "Erreur lors de l'analyse de sentiment."}},
           response_model=Dict[str, str])
 async def analyse_thread_sentiment(request: Request, id:str, auth: dict = Depends(get_api_key)):
@@ -110,7 +111,7 @@ async def analyse_thread_sentiment(request: Request, id:str, auth: dict = Depend
     result = sentiment_analysis_service.get_message_for_thread(id, mongo_url, "G1")
     return JSONResponse(content=result)
  
-@app.get("/answers", tags=["rag"], summary="Récupération de documents par rapport à une question", description="Route qui permet de récupérer les threads ayant des messages similaires à une question.", 
+@app.get("/api/answers", tags=["rag"], summary="Récupération de documents par rapport à une question", description="Route qui permet de récupérer les threads ayant des messages similaires à une question.", 
          responses={200: {"description": "Les messages similaires ont été récupérés avec succès."}, 404: {"description": "Aucun message similaire trouvé."}, 500: {"description": "Erreur lors de la récupération des messages similaires."}}, 
          response_model=Dict[str, str])
 def get_threads_similars_for_text(request: Request, text: str, course_name: str | None, auth: dict = Depends(get_api_key)):
@@ -145,9 +146,11 @@ def get_threads_similars_for_text(request: Request, text: str, course_name: str 
         
     else:
         return JSONResponse(content={"error": "Failed to connect to the database."}, status_code=500)
+# Include the router from api.routers.endpoints
+app.include_router(router)
 
 
-@app.get("/clustering/all", tags=["clustering"], summary="Récupération de toutes les données de clustering", description="Route qui permet de récupérer toutes les données de clustering.", response_model=Dict[str, str])
+@app.get("/api/clustering/all", tags=["clustering"], summary="Récupération de toutes les données de clustering", description="Route qui permet de récupérer toutes les données de clustering.", response_model=Dict[str, str])
 async def get_all_clustering_data(request: Request, auth: dict = Depends(get_api_key)):
     data = clustering_module.get_all_data()
     if data:
@@ -164,22 +167,22 @@ async def get_all_clustering_data(request: Request, auth: dict = Depends(get_api
     else:
         return JSONResponse(content={"error": "No clustering data found."}, status_code=404)
 
-@app.get("/clustering/stats", tags=["clustering"], summary="Récupération des statistiques de clustering", description="Route qui permet de récupérer les statistiques de clustering.", response_model=Dict[str, str])
+@app.get("/api/clustering/stats", tags=["clustering"], summary="Récupération des statistiques de clustering", description="Route qui permet de récupérer les statistiques de clustering.", response_model=Dict[str, str])
 async def get_clustering_stats(request: Request, auth: dict = Depends(get_api_key)):
     stats = clustering_module.get_stats()
     return JSONResponse(content=stats)
 
-@app.get("/clustering/topics", tags=["clustering"], summary="Récupération du tableau des topics", description="Route qui permet de récupérer le tableau des topics.", response_model=Dict[str, str])
+@app.get("/api/clustering/topics", tags=["clustering"], summary="Récupération du tableau des topics", description="Route qui permet de récupérer le tableau des topics.", response_model=Dict[str, str])
 async def get_clustering_table(request: Request, auth: dict = Depends(get_api_key)):
     table = clustering_module.get_topics_table()
     return JSONResponse(content=table)
 
-@app.get("/clustering/topic_details/{topic_id}", tags=["clustering"], summary="Récupération des détails d'un topic", description="Route qui permet de récupérer les détails d'un topic.", response_model=Dict[str, str])
+@app.get("/api/clustering/topic_details/{topic_id}", tags=["clustering"], summary="Récupération des détails d'un topic", description="Route qui permet de récupérer les détails d'un topic.", response_model=Dict[str, str])
 async def get_clustering_topic_details(request: Request, topic_id: int, auth: dict = Depends(get_api_key)):
     details = clustering_module.get_topic_details(topic_id)
     return JSONResponse(content=details)
 
-@app.post("/clustering/force_reload", tags=["clustering"], summary="Forcer le rechargement des données de clustering", description="Route qui permet de forcer le rechargement des données de clustering.", response_model=Dict[str, str])
+@app.post("/api/clustering/force_reload", tags=["clustering"], summary="Forcer le rechargement des données de clustering", description="Route qui permet de forcer le rechargement des données de clustering.", response_model=Dict[str, str])
 async def force_reload_clustering_data(request: Request, auth: dict = Depends(get_api_key)):
     try:
         clustering_module.force_reload()
