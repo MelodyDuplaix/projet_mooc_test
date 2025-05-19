@@ -181,8 +181,11 @@ async def get_clustering_topic_details(request: Request, topic_id: int, auth: di
 
 @app.post("/clustering/force_reload", tags=["clustering"], summary="Forcer le rechargement des données de clustering", description="Route qui permet de forcer le rechargement des données de clustering.", response_model=Dict[str, str])
 async def force_reload_clustering_data(request: Request, auth: dict = Depends(get_api_key)):
-    clustering_module.force_reload()
-    return JSONResponse(content={"message": "Données de clustering rechargées avec succès."})
+    try:
+        clustering_module.force_reload()
+        return JSONResponse(content={"message": "success"})
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
 
 if __name__ == "__main__":
     import uvicorn
