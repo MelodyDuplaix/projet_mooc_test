@@ -5,3 +5,7 @@ seaborn
 matplotlib
 plotly
 transformers
+fastapi
+uvicorn
+sentence_transformers
+scikit-learn

@@ -10,7 +10,7 @@ Ce projet vise à monitorer une formation à distance en utilisant des technique
 - Identifier les participants "proches" (ayant suivi les mêmes cours, répondu aux mêmes fils...).
 
 ## Technologies Utilisées
-
+ 
 - **MongoDB:** Base de données pour le stockage des données.
 - **Git:** Gestion de version du code.
 - **Python:** API et Application web
