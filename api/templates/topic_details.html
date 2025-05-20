@@ -4,17 +4,105 @@
     <meta charset="UTF-8">
     <title>Détails du Topic - FUN MOOC</title>
     <link rel="stylesheet" href="/static/style.css">
+    <style>
+        body {
+            font-family: sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+            padding: 20px;
+        }
+        table {
+            width: 80%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            overflow-x: auto; /* Add horizontal scroll if needed */
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        a {
+            display: block;
+            margin: 0 auto;
+            width: fit-content;
+            text-align: center;
+            padding: 10px 20px;
+        }
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 10px;
+        }
+        .pagination button {
+            margin: 0 5px;
+            padding: 5px 10px;
+        }
+    </style>
 </head>
 <body>
     <h1>Détails du Topic: {{ topic_name }}</h1>
     <p>Mots clés: {{ topic_keywords }}</p>
     <p>Nombre de messages: {{ count }}</p>
     <h2>Messages</h2>
-    <ul>
-        {% for message in messages %}
-            <li>{{ message }}</li>
-        {% endfor %}
-    </ul>
+    <table id="messages-table">
+        <thead>
+            <tr>
+                <th>Message</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for message in messages %}
+                <tr>
+                    <td>{{ message }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    <div class="pagination"></div>
     <a href="/clustering_threads">Retour au clustering</a>
+    <script>
+        const table = document.getElementById('messages-table');
+        const rows = table.rows;
+        const messagesPerPage = 50;
+        let currentPage = 1;
+        const totalPages = Math.ceil(rows.length / messagesPerPage);
+        const paginationContainer = document.querySelector('.pagination');
+
+        function showPage(page) {
+            for (let i = 0; i < rows.length; i++) {
+                if (i >= (page - 1) * messagesPerPage && i < page * messagesPerPage) {
+                    rows[i].style.display = '';
+                } else {
+                    rows[i].style.display = 'none';
+                }
+            }
+        }
+
+        function createPaginationButtons() {
+            paginationContainer.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const button = document.createElement('button');
+                button.textContent = i;
+                button.addEventListener('click', () => {
+                    currentPage = i;
+                    showPage(currentPage);
+                    updateActivePage(i);
+                });
+                paginationContainer.appendChild(button);
+            }
+        }
+
+        function updateActivePage(activePage) {
+            const buttons = paginationContainer.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.style.backgroundColor = button.textContent === activePage.toString() ? 'lightblue' : '';
+            });
+        }
+
+        showPage(currentPage);
+        createPaginationButtons();
+        updateActivePage(currentPage);
+    </script>
 </body>
 </html>
