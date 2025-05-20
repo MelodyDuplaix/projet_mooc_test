@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Détails du Topic - FUN MOOC</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Détails du Topic: {{ topic_name }}</h1>
+    <p>Mots clés: {{ topic_keywords }}</p>
+    <p>Nombre de messages: {{ count }}</p>
+    <h2>Messages</h2>
+    <ul>
+        {% for message in messages %}
+            <li>{{ message }}</li>
+        {% endfor %}
+    </ul>
+    <a href="/clustering_threads">Retour au clustering</a>
+</body>
+</html>

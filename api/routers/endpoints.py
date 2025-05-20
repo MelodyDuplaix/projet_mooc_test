@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Request, Depends, Form, HTTPException
+from fastapi import APIRouter, Request, Depends, Form, HTTPException, Path
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 import os
@@ -6,7 +6,7 @@ from api.services.auth import get_api_key
 from api.services.database_helper import connect_to_db, get_similar_documents, get_all_data_similar_documents, get_similars_messages_from_vector
 from api.services import sentiment as sentiment_analysis_service
 from api.services.embedding import embedding_message
-from api.services.clustering_module import get_all_data
+from api.services.clustering_module import get_all_data, get_topic_details
 
 router = APIRouter()
 
@@ -190,5 +190,12 @@ def discussion_thread_page(request: Request):
             "get_flag": get_flag,
         }
     )
+
+@router.get("/clustering_thread/{id}", response_class=HTMLResponse)
+def clustering_thread_details(request: Request, id: int = Path(...)):
+    topic_data = get_topic_details(id)
+    if not topic_data:
+        raise HTTPException(status_code=404, detail="Topic not found")
+    return templates.TemplateResponse("topic_details.html", {"request": request, **topic_data})
 
 # Ajoute ici d'autres routes comme dans l'ancien main.py si besoin

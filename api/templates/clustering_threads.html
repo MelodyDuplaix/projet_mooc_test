@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <title>Clustering des fils de discussion - FUN MOOC</title>
     <link rel="stylesheet" href="/static/style.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> </head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
 <body>
     <!-- marge et paddding coté et bas, pas droite -->
     <div style="margin: 0px 30px 30px 30px; padding: 0px 40px 40px 40px;">
@@ -34,7 +35,7 @@
                     <tr>
                         <td style="border: 1px solid black; padding: 4px; text-align: left;">{{ topic.topic_id }}</td>
                         <td style="border: 1px solid black; padding: 4px; text-align: left;">{{ topic.topic_name | truncate(50) }}</td>
-                        <td style="border: 1px solid black; padding: 4px; text-align: left;">{{ topic.topic_keywords | truncate(50) }}</td>
+                        <td style="border: 1px solid black; padding: 4px; text-align: left;">{{ topic.topic_keywords | truncate(100) }}</td>
                         <td style="border: 1px solid black; padding: 4px; text-align: left;">{{ topic.count }}</td>
                     </tr>
                     {% endif %}
@@ -89,37 +90,80 @@
             </script>
 
 
-            <h2 style="text-align: center;">Histogramme des 20 Topics les plus fréquents</h2>
-            <canvas id="topic-histogram"></canvas>
-            <script>
-                const ctx = document.getElementById('topic-histogram').getContext('2d');
-                const topicData = JSON.parse('{{ data.topics_table | tojson | safe }}').filter(topic => topic.topic_id !== -1);
-                if (topicData && topicData.length > 0) {
-                    const sortedData = topicData.sort((a, b) => b.count - a.count).slice(0, 20);
-                    const labels = sortedData.map(topic => topic.topic_name);
-                    const counts = sortedData.map(topic => topic.count);
-                new Chart(ctx, {
-                    type: 'bar',
-                    data: {
-                        labels: labels,
-                        datasets: [{
-                            label: 'Nombre de messages',
-                            data: counts,
-                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                            borderColor: 'rgba(54, 162, 235, 1)',
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        scales: {
-                            y: {
-                                beginAtZero: true
-                            }
+    <div style="text-align: center;">
+        <h2 style="text-align: center;">Sélecteur de Topic</h2>
+        <div style="display: flex; justify-content: center; align-items: center;">
+            <input type="text" id="topic-selector" placeholder="Tapez pour filtrer...">
+            <button id="topic-details-button" style="margin-left: 10px;">Détails</button>
+        </div>
+        <ul id="topic-list" style="list-style: none; padding: 0; text-align: center;"></ul>
+    </div>
+    <script>
+        const topicSelector = document.getElementById('topic-selector');
+        const topicList = document.getElementById('topic-list');
+        const topicData = JSON.parse('{{ data.topics_table | tojson | safe }}').filter(topic => topic.topic_id !== -1);
+        const detailsButton = document.getElementById('topic-details-button');
+
+        topicSelector.addEventListener('input', () => {
+            const filter = topicSelector.value.toLowerCase();
+            topicList.innerHTML = '';
+            topicData.forEach(topic => {
+                if (topic.topic_name.toLowerCase().includes(filter)) {
+                    const listItem = document.createElement('li');
+                    listItem.textContent = topic.topic_name;
+                    listItem.style.cursor = 'pointer';
+                    listItem.addEventListener('click', () => {
+                        topicSelector.value = topic.topic_name;
+                        topicList.innerHTML = '';
+                    });
+                    topicList.appendChild(listItem);
+                }
+            });
+        });
+
+        detailsButton.addEventListener('click', () => {
+            const selectedTopicName = topicSelector.value;
+            const selectedTopic = topicData.find(topic => topic.topic_name === selectedTopicName);
+            if (selectedTopic) {
+                window.location.href = `/clustering_thread/${selectedTopic.topic_id}`;
+            } else {
+                alert('Veuillez sélectionner un topic.');
+            }
+        });
+    </script>
+
+
+    <h2 style="text-align: center;">Histogramme des 20 Topics les plus fréquents</h2>
+    <canvas id="topic-histogram"></canvas>
+    <script>
+        const ctx = document.getElementById('topic-histogram').getContext('2d');
+        const chartData = JSON.parse('{{ data.topics_table | tojson | safe }}').filter(topic => topic.topic_id !== -1);
+        if (chartData && chartData.length > 0) {
+            const sortedData = chartData.sort((a, b) => b.count - a.count).slice(0, 20);
+            const labels = sortedData.map(topic => topic.topic_name);
+            const counts = sortedData.map(topic => topic.count);
+            new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Nombre de messages',
+                        data: counts,
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
                         }
                     }
-                });
-            }
-            </script>
+                }
+            });
+        }
+    </script>
 
             <a href="/" style="display: block; text-align: center; margin-top: 20px;">Accueil</a>
     </div>
