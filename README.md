@@ -14,11 +14,15 @@ Ce projet vise à monitorer une formation à distance en utilisant des technique
 - **MongoDB:** Base de données pour le stockage des données.
 - **Git:** Gestion de version du code.
 - **Python:** API et Application web
-- **SQL:** (Potentiellement utilisé en complément de MongoDB, à préciser).
+- **PostgreSQL:** Utilisée pour le stockage des embeddings, des documents et des similarités.
+- **Hugging Face:** Utilisée pour le modèle de langage, d'embedding et de clustering.
 
 ## Données
 
-Les données utilisées proviennent d'extractions de forums de MOOC, anciennes et récentes.
+Les données utilisées proviennent d'extractions de forums de MOOC, anciennes et récentes. Elles sont stockées dans la base de données MongoDB
+sous forme de documents JSON.
+
+Les données sont ensuite exportées dans la base de données PostgreSQL pour le stockage des embeddings, des documents et des similarités.
 
 ## Architecture
 
@@ -38,7 +42,41 @@ Les données utilisées proviennent d'extractions de forums de MOOC, anciennes e
 - Fonctionnalités supplémentaires.
 - Rapport de données complet.
 
+## Installation (local)
 
-## Installation
+### Prérequis
+
+- Python 3.x
+- MongoDB
+- Git
+
+### Cloner le repository
+
+```bash
+git clone https://github.com/yourusername/projet_mooc.git
+cd projet_mooc
+```
+
+### Créer un environnement virtuel
+
+```bash
+python -m venv venv
+source venv/bin/activate # Linux/Mac
+.\venv\Scripts\activate # Windows
+```
+
+### Installer les dépendances
+
+```bash
+pip install -r requirements.txt
+```
+
+## Utilisation
+
+```bash
+python main.py
+```
+
+
 
 
