@@ -6,6 +6,7 @@ from api.services.auth import get_api_key
 from api.services.database_helper import connect_to_db, get_similar_documents, get_all_data_similar_documents, get_similars_messages_from_vector
 from api.services import sentiment as sentiment_analysis_service
 from api.services.embedding import embedding_message
+from api.services.clustering_module import get_all_data
 
 router = APIRouter()
 
@@ -87,9 +88,7 @@ async def question_submit(request: Request, question: str = Form(...), auth: dic
         {
             "request": request,
             "question": question,
-            "reponse": similar_docs # Passe les documents similaires trouvés
-            # Vous pourriez vouloir adapter votre template question.html
-            # pour afficher ces 'similar_docs' au lieu d'une simple string 'reponse'
+            "reponse": similar_docs
         }
     )
 
@@ -127,9 +126,8 @@ def discussion_page(request: Request):
 
 @router.get("/clustering_threads", response_class=HTMLResponse)
 def clustering_threads(request: Request):
-    # This route definition might also be duplicated if it exists in main.py
-    # À adapter avec de vraies données de clustering
-    return templates.TemplateResponse("clustering_threads.html", {"request": request, "clusters": []})
+    data = get_all_data()
+    return templates.TemplateResponse("clustering_threads.html", {"request": request, "data": data})
 
 @router.get("/clustering_participants", response_class=HTMLResponse)
 def clustering_participants(request: Request):
@@ -193,4 +191,4 @@ def discussion_thread_page(request: Request):
         }
     )
 
-# Ajoute ici d'autres routes comme dans l'ancien main.py si besoin 
+# Ajoute ici d'autres routes comme dans l'ancien main.py si besoin

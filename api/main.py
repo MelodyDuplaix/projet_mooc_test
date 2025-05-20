@@ -30,8 +30,8 @@ app = FastAPI(
     title="API",
     description="API pour analyser les threads et messages des forums de discussion des moocs de fun mooc",
     version="0.1.0",
-    docs_url="/docs",
-    redoc_url="/redoc",
+    docs_url="/api/docs",
+    redoc_url="/api/redoc",
     openapi_tags=[
         {
             "name": "Analyse de sentiments",
@@ -57,11 +57,14 @@ app.mount("/static", StaticFiles(directory=os.path.join(os.path.dirname(__file__
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+app.include_router(router, include_in_schema=False)
 
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 
@@ -146,8 +149,6 @@ def get_threads_similars_for_text(request: Request, text: str, course_name: str 
         
     else:
         return JSONResponse(content={"error": "Failed to connect to the database."}, status_code=500)
-# Include the router from api.routers.endpoints
-app.include_router(router)
 
 
 @app.get("/api/clustering/all", tags=["clustering"], summary="Récupération de toutes les données de clustering", description="Route qui permet de récupérer toutes les données de clustering.", response_model=Dict[str, str])

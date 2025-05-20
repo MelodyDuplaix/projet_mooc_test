@@ -4,23 +4,124 @@
     <meta charset="UTF-8">
     <title>Clustering des fils de discussion - FUN MOOC</title>
     <link rel="stylesheet" href="/static/style.css">
-</head>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> </head>
 <body>
-    <div class="dashboard-thread">
-        <h1 style="color: #1873b7;">Regroupement des fils de discussion</h1>
+    <!-- marge et paddding coté et bas, pas droite -->
+    <div style="margin: 0px 30px 30px 30px; padding: 0px 40px 40px 40px;">
+        <div class="dashboard-thread">
+                <h1 style="color: #1873b7; text-align: center;">Regroupement des fils de discussion</h1>
+                <div style="display: flex; justify-content: space-around; border: 2px solid black; padding: 10px; background-color: lightblue; gap: 10px;">
+                    <p style="margin: 0;">Nombre de topics: <br/> {{ data.stats.total_topics }}</p>
+                    <p style="margin: 0;">Nombre de messages: <br/> {{ data.stats.total_messages }}</p>
+                    <p style="margin: 0;">Moyenne nb messages par topic: <br/> {{ data.stats.mean_messages_per_topic | round(2) }}</p>
+                    <p style="margin: 0;">Médiane nb messages par topic: <br/> {{ data.stats.median_messages_per_topic | round(2) }}</p>
+                </div>
+            </div>
+
+            <h2 style="text-align: center;">Tableau des Topics</h2>
+            <table id="topics-table" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Nom</th>
+                        <th>Mots clés</th>
+                        <th>Nombre de messages</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for topic in data.topics_table %}
+                    {% if topic.topic_id != -1 %}
+                    <tr>
+                        <td style="border: 1px solid black; padding: 4px; text-align: left;">{{ topic.topic_id }}</td>
+                        <td style="border: 1px solid black; padding: 4px; text-align: left;">{{ topic.topic_name | truncate(50) }}</td>
+                        <td style="border: 1px solid black; padding: 4px; text-align: left;">{{ topic.topic_keywords | truncate(50) }}</td>
+                        <td style="border: 1px solid black; padding: 4px; text-align: left;">{{ topic.count }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+            <script>
+                const table = document.getElementById('topics-table');
+                const rows = table.rows;
+                const numRowsPerPage = 30;
+                let currentPage = 1;
+                const totalPages = Math.ceil(rows.length / numRowsPerPage);
+
+                function showPage(page) {
+                    for (let i = 0; i < rows.length; i++) {
+                        if (i >= (page - 1) * numRowsPerPage && i < page * numRowsPerPage) {
+                            rows[i].style.display = '';
+                        } else {
+                            rows[i].style.display = 'none';
+                        }
+                    }
+                }
+
+                showPage(currentPage);
+
+                const paginationContainer = document.createElement('div');
+                paginationContainer.style.display = 'flex';
+                paginationContainer.style.justifyContent = 'center';
+                paginationContainer.style.marginTop = '10px';
+
+                for (let i = 1; i <= totalPages; i++) {
+                    const pageButton = document.createElement('button');
+                    pageButton.textContent = i;
+                    pageButton.addEventListener('click', () => {
+                        currentPage = i;
+                        showPage(currentPage);
+                        updateActivePage(i);
+                    });
+                    paginationContainer.appendChild(pageButton);
+                }
+
+                table.parentNode.insertBefore(paginationContainer, table.nextSibling);
+
+                function updateActivePage(activePage) {
+                    for (let i = 1; i <= totalPages; i++) {
+                        const button = paginationContainer.querySelector(`button:nth-child(${i})`);
+                        button.style.backgroundColor = i === activePage ? 'lightblue' : '';
+                    }
+                }
+
+                updateActivePage(currentPage);
+            </script>
+
+
+            <h2 style="text-align: center;">Histogramme des 20 Topics les plus fréquents</h2>
+            <canvas id="topic-histogram"></canvas>
+            <script>
+                const ctx = document.getElementById('topic-histogram').getContext('2d');
+                const topicData = JSON.parse('{{ data.topics_table | tojson | safe }}').filter(topic => topic.topic_id !== -1);
+                if (topicData && topicData.length > 0) {
+                    const sortedData = topicData.sort((a, b) => b.count - a.count).slice(0, 20);
+                    const labels = sortedData.map(topic => topic.topic_name);
+                    const counts = sortedData.map(topic => topic.count);
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Nombre de messages',
+                            data: counts,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+            </script>
+
+            <a href="/" style="display: block; text-align: center; margin-top: 20px;">Accueil</a>
     </div>
-    <ul>
-        {% for cluster in clusters %}
-        <li>
-            <strong>{{ cluster.nom }}</strong> :
-            <ul>
-                {% for thread in cluster.threads %}
-                <li>{{ thread }}</li>
-                {% endfor %}
-            </ul>
-        </li>
-        {% endfor %}
-    </ul>
-    <a href="/">Accueil</a>
 </body>
-</html> 
+</html>
