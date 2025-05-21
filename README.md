@@ -77,6 +77,20 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## Architecture
 
-
-
+projet_mooc_test/
+├── analyse/           # Outils d'analyse de données et modèles statistiques
+├── api/               # API REST pour l'interface avec l'application web
+├── data/              # Données brutes et traitées (MongoDB et PostgreSQL)
+├── docs/              # Documentation du projet
+├── graphique/         # Composants de visualisation et graphiques
+├── images/            # Ressources statiques (logos, icônes)
+├── notebooks/         # Notebooks Jupyter pour l'analyse et le prototypage
+├── scripts/           # Scripts utilitaires (import de données, etc.)
+├── .env               # Variables d'environnement (non versionnées)
+├── .env.exemple       # Exemple de configuration des variables d'environnement
+├── .gitignore         # Fichiers à ignorer pour Git
+├── main.py            # Point d'entrée principal de l'application
+├── README.md          # Documentation principale
+└── requirements.txt   # Dépendances Python
