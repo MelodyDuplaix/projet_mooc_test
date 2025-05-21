@@ -118,7 +118,7 @@ def apply_topic_modeling(df, save_model=True):
     from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS, CountVectorizer
 
     try:
-        from sklearn.feature_extraction.text import FRENCH_STOP_WORDS
+        from sklearn.feature_extraction.text import FRENCH_STOP_WORDS # type: ignore
         stop_words = set(ENGLISH_STOP_WORDS).union(FRENCH_STOP_WORDS)
     except ImportError:
         stop_words = set(ENGLISH_STOP_WORDS)

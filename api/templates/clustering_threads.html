@@ -5,167 +5,154 @@
     <title>Clustering des fils de discussion - FUN MOOC</title>
     <link rel="stylesheet" href="/static/style.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"></script>
+
+    <style>
+    .table-forum {
+        font-size: 0.93em;
+        border-collapse: collapse;
+        width: 100%;
+        min-width: 700px;
+    }
+    .table-forum th, .table-forum td {
+        border: 1.5px solid #b2bec3;
+        padding: 7px 6px;
+        vertical-align: middle;
+        background: #f5f5f5;
+    }
+    .table-forum th {
+        background: #e3e3e3;
+        color: #1873b7;
+        font-weight: bold;
+        font-size: 0.92em;
+        white-space: nowrap;
+    }
+    .table-forum tr {
+        background: #f5f5f5;
+    }
+    .table-forum tr:nth-child(even) {
+        background: #e9e9e9;
+    }
+    .table-forum th.c-narrow, .table-forum td.c-narrow {
+        min-width: 10px;
+        max-width: 250px;
+        text-align: right;
+    }
+    .table-forum th.c-cours, .table-forum td.c-cours {
+        min-width: 200px;
+        max-width: 600px;
+        text-align: left;
+        white-space: nowrap;
+        font-weight: 500;
+    }
+    .table-responsive {
+        overflow-x: auto;
+        width: 100%;
+        background-color: #e3f0fa;
+        padding: 1em;
+        border-radius: 8px;
+        border: 1px solid #ccc;
+    }
+    .dashboard-thread {
+        margin: 2em auto;
+        max-width: 1200px;
+        padding: 2em;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    .sujet-principal {
+        padding: 1em;
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    </style>
 </head>
 <body>
-    <!-- marge et paddding coté et bas, pas droite -->
-    <div style="margin: 0px 30px 30px 30px; padding: 0px 40px 40px 40px;">
-        <div class="dashboard-thread">
-                <h1 style="color: #1873b7; text-align: center;">Regroupement des fils de discussion</h1>
-                <div style="display: flex; justify-content: space-around; border: 2px solid black; padding: 10px; background-color: lightblue; gap: 10px;">
-                    <p style="margin: 0;">Nombre de topics: <br/> {{ data.stats.total_topics }}</p>
-                    <p style="margin: 0;">Nombre de messages: <br/> {{ data.stats.total_messages }}</p>
-                    <p style="margin: 0;">Moyenne nb messages par topic: <br/> {{ data.stats.mean_messages_per_topic | round(2) }}</p>
-                    <p style="margin: 0;">Médiane nb messages par topic: <br/> {{ data.stats.median_messages_per_topic | round(2) }}</p>
-                </div>
-            </div>
-
-            <h2 style="text-align: center;">Tableau des Topics</h2>
-            <table id="topics-table" style="width: 100%; border-collapse: collapse; margin-top: 20px;">
+    <div class="dashboard-thread">
+        <h1 style="color: #1873b7; text-align: center;">Regroupement des fils de discussion</h1>
+        <div style="display: flex; justify-content: space-around; border: 2px solid black; padding: 10px; background-color: lightblue; gap: 10px;">
+            <p style="margin: 0;">Nombre de topics: <br/> {{ data.stats.total_topics }}</p>
+            <p style="margin: 0;">Nombre de messages: <br/> {{ data.stats.total_messages }}</p>
+            <p style="margin: 0;">Moyenne nb messages par topic: <br/> {{ data.stats.mean_messages_per_topic | round(2) }}</p>
+            <p style="margin: 0;">Médiane nb messages par topic: <br/> {{ data.stats.median_messages_per_topic | round(2) }}</p>
+        </div>
+        <h2 style="text-align: center;">Tableau des Topics</h2>
+        <div class="table-responsive">
+            <table id="topics-table" class="table-forum">
                 <thead>
                     <tr>
-                        <th>ID</th>
-                        <th>Nom</th>
-                        <th>Mots clés</th>
-                        <th>Nombre de messages</th>
+                        <th class="c-narrow">ID</th>
+                        <th class="c-cours">Nom</th>
+                        <th class="c-cours">Mots clés</th>
+                        <th class="c-narrow">Nombre de messages</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for topic in data.topics_table %}
                     {% if topic.topic_id != -1 %}
                     <tr>
-                        <td style="border: 1px solid black; padding: 4px; text-align: left;">{{ topic.topic_id }}</td>
-                        <td style="border: 1px solid black; padding: 4px; text-align: left;">{{ topic.topic_name | truncate(50) }}</td>
-                        <td style="border: 1px solid black; padding: 4px; text-align: left;">{{ topic.topic_keywords | truncate(100) }}</td>
-                        <td style="border: 1px solid black; padding: 4px; text-align: left;">{{ topic.count }}</td>
+                        <td class="c-narrow">{{ topic.topic_id }}</td>
+                        <td class="c-narrow"><a href="/clustering_thread/{{topic.topic_id}}">{{ topic.topic_name | truncate(50) }}</a></td>
+                        <td class="c-cours">{{ topic.topic_keywords | truncate(100) }}</td>
+                        <td class="c-narrow">{{ topic.count }}</td>
                     </tr>
                     {% endif %}
                     {% endfor %}
                 </tbody>
             </table>
-            <script>
-                const table = document.getElementById('topics-table');
-                const rows = table.rows;
-                const numRowsPerPage = 30;
-                let currentPage = 1;
-                const totalPages = Math.ceil(rows.length / numRowsPerPage);
-
-                function showPage(page) {
-                    for (let i = 0; i < rows.length; i++) {
-                        if (i >= (page - 1) * numRowsPerPage && i < page * numRowsPerPage) {
-                            rows[i].style.display = '';
-                        } else {
-                            rows[i].style.display = 'none';
-                        }
-                    }
-                }
-
-                showPage(currentPage);
-
-                const paginationContainer = document.createElement('div');
-                paginationContainer.style.display = 'flex';
-                paginationContainer.style.justifyContent = 'center';
-                paginationContainer.style.marginTop = '10px';
-
-                for (let i = 1; i <= totalPages; i++) {
-                    const pageButton = document.createElement('button');
-                    pageButton.textContent = i;
-                    pageButton.addEventListener('click', () => {
-                        currentPage = i;
-                        showPage(currentPage);
-                        updateActivePage(i);
-                    });
-                    paginationContainer.appendChild(pageButton);
-                }
-
-                table.parentNode.insertBefore(paginationContainer, table.nextSibling);
-
-                function updateActivePage(activePage) {
-                    for (let i = 1; i <= totalPages; i++) {
-                        const button = paginationContainer.querySelector(`button:nth-child(${i})`);
-                        button.style.backgroundColor = i === activePage ? 'lightblue' : '';
-                    }
-                }
-
-                updateActivePage(currentPage);
-            </script>
-
-
-    <div style="text-align: center;">
-        <h2 style="text-align: center;">Sélecteur de Topic</h2>
-        <div style="display: flex; justify-content: center; align-items: center;">
-            <input type="text" id="topic-selector" placeholder="Tapez pour filtrer...">
-            <button id="topic-details-button" style="margin-left: 10px;">Détails</button>
         </div>
-        <ul id="topic-list" style="list-style: none; padding: 0; text-align: center;"></ul>
-    </div>
-    <script>
-        const topicSelector = document.getElementById('topic-selector');
-        const topicList = document.getElementById('topic-list');
-        const topicData = JSON.parse('{{ data.topics_table | tojson | safe }}').filter(topic => topic.topic_id !== -1);
-        const detailsButton = document.getElementById('topic-details-button');
+        
+        <script>
+            $(document).ready( function () {
+                $('#topics-table').DataTable({
+                    "pagingType": "full_numbers",
+                    "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+                    "pageLength": 10,
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"
+                    }
+                });
+            } );
+        </script>
 
-        topicSelector.addEventListener('input', () => {
-            const filter = topicSelector.value.toLowerCase();
-            topicList.innerHTML = '';
-            topicData.forEach(topic => {
-                if (topic.topic_name.toLowerCase().includes(filter)) {
-                    const listItem = document.createElement('li');
-                    listItem.textContent = topic.topic_name;
-                    listItem.style.cursor = 'pointer';
-                    listItem.addEventListener('click', () => {
-                        topicSelector.value = topic.topic_name;
-                        topicList.innerHTML = '';
-                    });
-                    topicList.appendChild(listItem);
-                }
-            });
-        });
-
-        detailsButton.addEventListener('click', () => {
-            const selectedTopicName = topicSelector.value;
-            const selectedTopic = topicData.find(topic => topic.topic_name === selectedTopicName);
-            if (selectedTopic) {
-                window.location.href = `/clustering_thread/${selectedTopic.topic_id}`;
-            } else {
-                alert('Veuillez sélectionner un topic.');
-            }
-        });
-    </script>
-
-
-    <h2 style="text-align: center;">Histogramme des 20 Topics les plus fréquents</h2>
-    <canvas id="topic-histogram"></canvas>
-    <script>
-        const ctx = document.getElementById('topic-histogram').getContext('2d');
-        const chartData = JSON.parse('{{ data.topics_table | tojson | safe }}').filter(topic => topic.topic_id !== -1);
-        if (chartData && chartData.length > 0) {
-            const sortedData = chartData.sort((a, b) => b.count - a.count).slice(0, 20);
-            const labels = sortedData.map(topic => topic.topic_name);
-            const counts = sortedData.map(topic => topic.count);
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [{
-                        label: 'Nombre de messages',
-                        data: counts,
-                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
-                        borderColor: 'rgba(54, 162, 235, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    scales: {
-                        y: {
-                            beginAtZero: true
+        <h2 style="text-align: center;">Histogramme des 20 Topics les plus fréquents</h2>
+        <canvas id="topic-histogram"></canvas>
+        <script>
+            const ctx = document.getElementById('topic-histogram').getContext('2d');
+            const chartData = JSON.parse('{{ data.topics_table | tojson | safe }}').filter(topic => topic.topic_id !== -1);
+            if (chartData && chartData.length > 0) {
+                const sortedData = chartData.sort((a, b) => b.count - a.count).slice(0, 20);
+                const labels = sortedData.map(topic => topic.topic_name);
+                const counts = sortedData.map(topic => topic.count);
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Nombre de messages',
+                            data: counts,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
                         }
                     }
-                }
-            });
-        }
-    </script>
+                });
+            }
+        </script>
 
-            <a href="/" style="display: block; text-align: center; margin-top: 20px;">Accueil</a>
+                <a href="/" style="display: block; text-align: center; margin-top: 20px;">Accueil</a>
     </div>
 </body>
 </html>

@@ -53,7 +53,7 @@ def question_form(request: Request):
     return templates.TemplateResponse("question.html", {"request": request})
 
 @router.post("/question", response_class=HTMLResponse, tags=["rag"]) # Ajout du tag rag pour cohérence
-async def question_submit(request: Request, question: str = Form(...), auth: dict = Depends(get_api_key)): # Ajout de auth
+async def question_submit(request: Request, question: str = Form(...)): # Ajout de auth
     """
     Processes a user question, finds similar messages, and renders them in a HTML response.
 
@@ -175,7 +175,7 @@ def get_mongo_conn():
 async def discussion_thread_search(request: Request, thread_id: str = Form(...)):
     db = get_mongo_conn()
     try:
-        thread_doc = db.threads.find_one({"_id": ObjectId(thread_id)})
+        thread_doc = db.threads.find_one({"_id": thread_id})
     except Exception as e:
         thread_doc = None
     title = thread_doc["content"]["courseware_title"] if thread_doc and "content" in thread_doc and "courseware_title" in thread_doc["content"] else ""
@@ -198,5 +198,4 @@ def clustering_thread_details(request: Request, id: int = Path(...)):
 async def thread_page(request: Request, thread_id: str):
     db = get_mongo_conn()
     thread_doc = db.threads.find_one({"_id": thread_id})
-    print("thread_id =", thread_id)
     return templates.TemplateResponse("detail_thread.html", {"request": request, "thread": thread_doc})
