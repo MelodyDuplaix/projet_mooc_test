@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Regroupement des participants - FUN MOOC</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Thread</h1>
+    <p>{{ thread.content.title }}</p>
+    <p>{{ thread.content.body }}</p>
+    {% for message in thread.content.children %}
+        <p>{{ message.body }}</p>
+    {% endfor %}
+</body>
+</html> 
