@@ -1,5 +1,6 @@
 import os
 import ast
+import re
 import time
 import numpy as np
 import pandas as pd
@@ -111,12 +112,31 @@ def apply_topic_modeling(df, save_model=True):
         dict: Un dictionnaire contenant le DataFrame traité, les informations sur les sujets, les mots clés et le modèle BERTopic. Retourne None si le DataFrame d'entrée est invalide ou si la modélisation des sujets échoue.
     """
     from bertopic import BERTopic
+    from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
+    from sklearn.feature_extraction.text import CountVectorizer
+    import sklearn
+    from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS, CountVectorizer
+
+    try:
+        from sklearn.feature_extraction.text import FRENCH_STOP_WORDS
+        stop_words = set(ENGLISH_STOP_WORDS).union(FRENCH_STOP_WORDS)
+    except ImportError:
+        stop_words = set(ENGLISH_STOP_WORDS)
+
+    # Ajoutez ici vos stop words personnalisés
+    custom_stop_words = {
+        "le", "la", "à", "a", "et", "que", "bonjour", "les", "un", "une", "des", "du", "de", "je", "tu", "il", "elle", "nous", "vous", "ils", "elles", "on", "ce", "cette", "ces", "mon", "ton", "son", "ma", "ta", "sa", "mes", "tes", "ses", "notre", "votre", "leur", "nos", "vos", "leurs", "y", "en", "au", "aux", "avec", "pour", "sur", "dans", "par", "pas", "plus", "moins", "très", "est", "suis", "es", "sommes", "êtes", "sont"
+    }
+    stop_words = list(stop_words.union(custom_stop_words))
+
+    vectorizer = CountVectorizer(stop_words=stop_words)
+
     documents = df["message"].tolist()
     embeddings = df["vector"].tolist()
     embeddings = [ast.literal_eval(e) if isinstance(e, str) else e for e in embeddings]
     embeddings = np.array(embeddings)
 
-    model = BERTopic(verbose=True)
+    model = BERTopic(verbose=True, vectorizer_model=vectorizer)
     topics, probs = model.fit_transform(documents, embeddings)
 
     if save_model:
@@ -382,6 +402,7 @@ def force_reload():
 
 if __name__ == "__main__":
     print("Lancement du traitement de clustering principal...")
+    force_reload()
     data = get_all_data()
     print(pd.DataFrame(data["topics_table"]).head()) # type: ignore
     print(f"Nombre de topics : {len(data['topic_keywords'])}") # type: ignore
