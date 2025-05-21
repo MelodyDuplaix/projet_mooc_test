@@ -4,7 +4,7 @@ from fastapi.templating import Jinja2Templates
 import os
 from api.services.auth import get_api_key
 from api.services.database_helper import connect_to_db, get_similar_documents, get_all_data_similar_documents, get_similars_messages_from_vector
-from api.services import sentiment as sentiment_analysis_service
+from api.services.sentiment import get_message_for_thread
 from api.services.embedding import embedding_message
 from api.services.clustering_module import get_all_data, get_topic_details
 from pymongo import MongoClient
@@ -159,30 +159,34 @@ def clustering_participants(request: Request):
         {"request": request, "clusters": clusters, "get_flag": get_flag}
     )
 
-@router.get("/discussion_thread", response_class=HTMLResponse)
-async def discussion_thread_form(request: Request):
-    db = get_mongo_conn()
-    threads = list(db.threads.find({}, {"id": 1, "title": 1}))
-    return templates.TemplateResponse("discussion_thread.html", {"request": request, "thread": None, "messages": [], "threads": threads})
-
 def get_mongo_conn():
     mongo_url = os.getenv("MONGO_URL")
     client = MongoClient(mongo_url)
     db = client["G1"]  # Remplace "G1" par le nom de ta base si besoin
     return db
 
+@router.get("/discussion_thread", response_class=HTMLResponse)
+async def discussion_thread_form(request: Request):
+    db = get_mongo_conn()
+    threads = list(db.threads.find({}, {"id": 1, "content.title": 1}))
+    return templates.TemplateResponse("discussion_thread.html", {"request": request, "thread": None, "messages": [], "threads": threads})
+
 @router.post("/discussion_thread", response_class=HTMLResponse)
 async def discussion_thread_search(request: Request, thread_id: str = Form(...)):
-    db = get_mongo_conn()
     try:
-        thread_doc = db.threads.find_one({"_id": thread_id})
+        mongo_url = os.getenv("MONGO_URL")
+        if not mongo_url:
+            raise ValueError("MONGO_URL environment variable is not set")
+        db = get_mongo_conn()
+        thread_doc = db.documents.find_one({"_id": thread_id})
+        thread_title = thread_doc["title"] if thread_doc else "Thread not found"
+        messages = get_message_for_thread(thread_id, mongo_url, "G1")
+        threads = list(db.threads.find({}, {"id": 1, "content.title": 1}))
     except Exception as e:
-        thread_doc = None
-    title = thread_doc["content"]["courseware_title"] if thread_doc and "content" in thread_doc and "courseware_title" in thread_doc["content"] else ""
-    messages = thread_doc["content"]["children"] if thread_doc and "content" in thread_doc and "children" in thread_doc["content"] else []
+        messages = []
     return templates.TemplateResponse(
         "discussion_thread.html",
-        {"request": request, "thread": {"title": title}, "messages": messages}
+        {"request": request, "thread": {"title": thread_title}, "messages": messages, "threads": threads} 
     )
 
 @router.get("/clustering_thread/{id}", response_class=HTMLResponse)
