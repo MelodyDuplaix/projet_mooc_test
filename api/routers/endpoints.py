@@ -6,6 +6,8 @@ from api.services.auth import get_api_key
 from api.services.database_helper import connect_to_db, get_similar_documents, get_all_data_similar_documents, get_similars_messages_from_vector
 from api.services import sentiment as sentiment_analysis_service
 from api.services.embedding import embedding_message
+from bson.objectid import ObjectId
+from pymongo import MongoClient
 
 router = APIRouter()
 
@@ -39,7 +41,7 @@ async def get_similars_for_tread(request: Request, id: str, auth: dict = Depends
     if conn:
         similar_docs = get_similar_documents(conn, id, limit=10)
         if similar_docs:
-            similar_docs = get_all_data_similar_documents(similar_docs, os.getenv("MONGO_URL"), "G1", conn)
+            similar_docs = get_all_data_similar_documents(similar_docs, os.getenv("MONGO_URL"), "postgres", conn)
             conn.close()
             return JSONResponse(content={"error": None, "data": similar_docs}, status_code=200)
         else:
@@ -129,16 +131,13 @@ async def question_submit(request: Request, question: str = Form(...), auth: dic
 
     # else: Failed to connect to the database, similar_docs remains empty
 
-
-    # Adapter le renvoi de la réponse pour utiliser le template et les résultats
+    print("similar_docs =", similar_docs)
     return templates.TemplateResponse(
         "question.html",
         {
             "request": request,
             "question": question,
-            "reponse": similar_docs # Passe les documents similaires trouvés
-            # Vous pourriez vouloir adapter votre template question.html
-            # pour afficher ces 'similar_docs' au lieu d'une simple string 'reponse'
+            "reponse": similar_docs
         }
     )
 
@@ -211,35 +210,34 @@ def clustering_participants(request: Request):
     )
 
 @router.get("/discussion_thread", response_class=HTMLResponse)
-def discussion_thread_page(request: Request):
-    # This route definition might also be duplicated if it exists in main.py
-    messages = [
-        {"auteur": "Alice", "texte": "Super projet !", "sentiment": "Très positif", "langue": "fr"},
-        {"auteur": "Bob", "texte": "Pas mal", "sentiment": "Positif", "langue": "fr"},
-        {"auteur": "Eve", "texte": "Bof", "sentiment": "Neutre", "langue": "en"},
-        {"auteur": "John", "texte": "Nul", "sentiment": "Négatif", "langue": "fr"},
-        {"auteur": "Jane", "texte": "Horrible", "sentiment": "Très négatif", "langue": "fr"},
-    ]
-    nb_tres_positif = sum(1 for m in messages if m["sentiment"] == "Très positif")
-    nb_positif = sum(1 for m in messages if m["sentiment"] == "Positif")
-    nb_neutre = sum(1 for m in messages if m["sentiment"] == "Neutre")
-    nb_negatif = sum(1 for m in messages if m["sentiment"] == "Négatif")
-    nb_tres_negatif = sum(1 for m in messages if m["sentiment"] == "Très négatif")
-    langues = list(set(m["langue"] for m in messages))
-    thread = {"titre": "Avis du forum", "messages": messages}
+async def discussion_thread_form(request: Request):
+    db = get_mongo_conn()
+    threads = list(db.threads.find({}, {"id": 1, "title": 1}))
+    return templates.TemplateResponse("discussion_thread.html", {"request": request, "thread": None, "messages": [], "threads": threads})
+
+def get_mongo_conn():
+    mongo_url = os.getenv("MONGO_URL")
+    client = MongoClient(mongo_url)
+    db = client["G1"]  # Remplace "G1" par le nom de ta base si besoin
+    return db
+
+@router.post("/discussion_thread", response_class=HTMLResponse)
+async def discussion_thread_search(request: Request, thread_id: str = Form(...)):
+    db = get_mongo_conn()
+    try:
+        thread_doc = db.threads.find_one({"_id": ObjectId(thread_id)})
+    except Exception as e:
+        thread_doc = None
+    title = thread_doc["content"]["courseware_title"] if thread_doc and "content" in thread_doc and "courseware_title" in thread_doc["content"] else ""
+    messages = thread_doc["content"]["children"] if thread_doc and "content" in thread_doc and "children" in thread_doc["content"] else []
     return templates.TemplateResponse(
         "discussion_thread.html",
-        {
-            "request": request,
-            "thread": thread,
-            "nb_tres_positif": nb_tres_positif,
-            "nb_positif": nb_positif,
-            "nb_neutre": nb_neutre,
-            "nb_negatif": nb_negatif,
-            "nb_tres_negatif": nb_tres_negatif,
-            "langues": langues,
-            "get_flag": get_flag,
-        }
+        {"request": request, "thread": {"title": title}, "messages": messages}
     )
 
-# Ajoute ici d'autres routes comme dans l'ancien main.py si besoin 
+@router.get("/thread/{thread_id}", response_class=HTMLResponse)
+async def thread_page(request: Request, thread_id: str):
+    db = get_mongo_conn()
+    thread_doc = db.threads.find_one({"_id": thread_id})
+    print("thread_id =", thread_id)
+    return templates.TemplateResponse("detail_thread.html", {"request": request, "thread": thread_doc})
