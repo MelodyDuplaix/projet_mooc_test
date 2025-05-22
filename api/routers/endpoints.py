@@ -13,18 +13,6 @@ router = APIRouter()
 
 templates = Jinja2Templates(directory=os.path.join(os.path.dirname(os.path.dirname(__file__)), "templates"))
 
-def get_flag(langue):
-    """Helper function to get flag emojis for languages (if used in template)."""
-    flags = {
-        "fr": "🇫🇷",
-        "en": "🇬🇧",
-        "es": "🇪🇸",
-        "de": "🇩🇪",
-        "it": "🇮🇹",
-        # Add other languages if needed
-    }
-    return flags.get(langue, "🏳️") # White flag if language is unknown
-
 @router.get("/", response_class=HTMLResponse)
 def home(request: Request):
     return templates.TemplateResponse("home.html", {"request": request})
@@ -82,7 +70,6 @@ async def question_submit(request: Request, question: str = Form(...)): # Ajout 
 
     # else: Failed to connect to the database, similar_docs remains empty
 
-    print("similar_docs =", similar_docs)
     return templates.TemplateResponse(
         "question.html",
         {
