@@ -4,182 +4,22 @@
     <meta charset="UTF-8">
     <title>Fil de discussion</title>
     <link rel="stylesheet" href="/static/style.css">
-    <style>
-    .discussion-container {
-        max-width: 900px;
-        margin: 40px auto;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 18px 0 rgba(24, 115, 183, 0.10), 0 1.5px 4px 0 #b2bec3;
-        border: 1.5px solid #e3e3e3;
-        padding: 2.2em 2em 2em 2em;
-    }
-    .discussion-title {
-        color: #1873b7;
-        font-size: 1.5em;
-        font-weight: bold;
-        margin-bottom: 1.2em;
-        text-align: center;
-    }
-    .message-thread {
-        margin-bottom: 2em;
-        padding: 1.3em 1.5em;
-        border-radius: 10px;
-        background: #f4faff;
-        border-left: 6px solid #1873b7;
-        border-top: 1px solid #e3e3e3;
-        border-bottom: 1px solid #e3e3e3;
-        box-shadow: 0 2px 8px #dbeafe;
-        transition: background 0.2s;
-    }
-    .message-thread:nth-child(even) {
-        background: #eaf4fb;
-    }
-    .message-header {
-        display: flex;
-        align-items: center;
-        font-weight: bold;
-        color: #2c3e50;
-        margin-bottom: 0.5em;
-        font-size: 1.1em;
-    }
-    .message-header .avatar {
-        font-size: 1.5em;
-        margin-right: 0.7em;
-    }
-    .message-body {
-        color: #222;
-        font-size: 1.18em;
-        margin-bottom: 0.7em;
-        line-height: 1.7;
-        white-space: pre-line;
-    }
-    .message-meta {
-        font-size: 0.98em;
-        color: #888;
-        text-align: right;
-        margin-left: auto;
-    }
-    .dashboard-thread {
-    background: #fff;
-    border-radius: 12px;
-    box-shadow: 0 12px 36px rgba(44,62,80,0.28), 0 3px 12px rgba(44,62,80,0.18);
-    border: 2.5px solid #b2bec3;
-    padding: 32px 32px 24px 32px;
-    max-width: 800px;
-    margin: 40px auto;
-}
-
-.sujet-principal {
-    font-size: 1.2em;
-    font-weight: bold;
-    color: #2c3e50;
-    background: #eaf6ff;
-    border-left: 4px solid #3498db;
-    padding: 10px 16px;
-    margin-bottom: 24px;
-    border-radius: 6px;
-    box-shadow: 0 12px 36px rgba(44,62,80,0.28), 0 3px 12px rgba(44,62,80,0.18);
-    border: 2.5px solid #b2bec3;
-}
-
-ul.messages-thread {
-    list-style: none;
-    padding: 0;
-    margin-bottom: 28px;
-}
-ul.messages-thread li {
-    background: #fff;
-    border-radius: 8px;
-    margin-bottom: 16px;
-    padding: 16px 20px;
-    box-shadow: 0 12px 36px rgba(44,62,80,0.28), 0 3px 12px rgba(44,62,80,0.18);
-    border-left: 4px solid #b2bec3;
-    border: 2.5px solid #b2bec3;
-    transition: border-color 0.2s, box-shadow 0.2s;
-}
-ul.messages-thread li:hover {
-    border-left: 4px solid #3498db;
-    background: #f0f8ff;
-    box-shadow: 0 18px 54px rgba(44,62,80,0.32), 0 6px 24px rgba(44,62,80,0.22);
-}
-
-.langue {
-    font-size: 0.95em;
-    color: #636e72;
-}
-
-.sentiment {
-    font-size: 0.95em;
-    font-weight: bold;
-    padding: 2px 8px;
-    border-radius: 4px;
-    margin-left: 6px;
-}
-.sentiment-positive {
-    background: #d4f8e8;
-    color: #218c5a;
-}
-.sentiment-very-positive {
-    background: #145a32;
-    color: #fff;
-}
-.sentiment-neutral {
-    background: #f6e58d;
-    color: #b7950b;
-}
-.sentiment-negative {
-    background: #ffd6d6;
-    color: #c0392b;
-}
-.sentiment-very-negative {
-    background: #922b21;
-    color: #fff;
-}
-
-.resume-sentiments {
-    background: #f4f8fb;
-    border-radius: 8px;
-    padding: 12px 18px;
-    margin-bottom: 18px;
-    font-size: 1.05em;
-    color: #34495e;
-    box-shadow: 0 12px 36px rgba(44,62,80,0.28), 0 3px 12px rgba(44,62,80,0.18);
-    border: 2.5px solid #b2bec3;
-}
-
-@media (max-width: 600px) {
-    .dashboard-thread {
-        padding: 12px 2vw;
-    }
-    .sujet-principal {
-        font-size: 1em;
-        padding: 8px 8px;
-    }
-    ul.messages-thread li {
-        padding: 10px 8px;
-    }
-    .resume-sentiments {
-        padding: 8px 8px;
-    }
-}
-    </style>
 </head>
 <body>
-    <div style="text-align: center;">
-        <h2 style="text-align: center;">Fil de Discussion</h2>
-        <div style="display: flex; justify-content: center; align-items: center;">
-            <input type="text" id="thread-selector" placeholder="Tapez pour filtrer..." style="padding: 0.5em 1em; border-radius: 6px; border: 1px solid #b2bec3; width: 300px; font-size: 1.1em; margin-bottom: 1em;">
+    <div class="discussion-thread-header">
+        <h2 class="discussion-thread-title">Fil de Discussion</h2>
+        <div class="discussion-thread-filter-row">
+            <input type="text" id="thread-selector" placeholder="Tapez pour filtrer..." class="thread-selector-input">
         </div>
-        <ul id="thread-list" style="list-style: none; padding: 0; text-align: center;">
+        <ul id="thread-list" class="thread-list">
             {% for thread in threads %}
-                <li style="display: block; text-decoration: underline; color: blue; cursor: pointer;" data-thread-id="{{thread._id}}" data-thread-title="{{thread.content.title}}">{{thread.content.title}}</li>
+                <li class="thread-list-item" data-thread-id="{{thread._id}}" data-thread-title="{{thread.content.title}}">{{thread.content.title}}</li>
             {% endfor %}
         </ul>
     </div>
-    <div class="discussion-container dashboard-thread"  style="background: #fff;">
+    <div class="discussion-container dashboard-thread">
         {% if thread %}
-            <h1 style="color: #1873b7; background: none;">Fil de discussion</h1>
+            <h1 class="discussion-title">Fil de discussion</h1>
             <p class="sujet-principal"><strong>Sujet :</strong> {{ thread.title }}</p>
             <ul class="messages-thread">
             {% if messages and messages|length > 0 %}
@@ -198,7 +38,7 @@ ul.messages-thread li:hover {
                 <p>Aucun message trouvé pour ce fil.</p>
             {% endif %}
         {% endif %}
-        <div style="text-align: center; margin-top: 2em;">
+        <div class="discussion-thread-footer">
             <a href="/">Retour à l'accueil</a>
         </div>
     </div>

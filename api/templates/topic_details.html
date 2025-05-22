@@ -4,63 +4,30 @@
     <meta charset="UTF-8">
     <title>Détails du Topic - FUN MOOC</title>
     <link rel="stylesheet" href="/static/style.css">
-    <style>
-        body {
-            font-family: sans-serif;
-            line-height: 1.6;
-            margin: 20px;
-            padding: 20px;
-        }
-        table {
-            width: 80%;
-            border-collapse: collapse;
-            margin-top: 20px;
-            overflow-x: auto; /* Add horizontal scroll if needed */
-        }
-        th, td {
-            border: 1px solid black;
-            padding: 8px;
-            text-align: left;
-        }
-        a {
-            display: block;
-            margin: 0 auto;
-            width: fit-content;
-            text-align: center;
-            padding: 10px 20px;
-        }
-        .pagination {
-            display: flex;
-            justify-content: center;
-            margin-top: 10px;
-        }
-        .pagination button {
-            margin: 0 5px;
-            padding: 5px 10px;
-        }
-    </style>
 </head>
-<body>
+<body class="topic-details-body">
     <h1>Détails du Topic: {{ topic_name }}</h1>
     <p>Mots clés: {{ topic_keywords }}</p>
     <p>Nombre de messages: {{ count }}</p>
     <h2>Messages</h2>
-    <table id="messages-table">
-        <thead>
-            <tr>
-                <th>Message</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for message in messages %}
+    <div class="table-responsive">
+        <table id="messages-table" class="topic-details-table">
+            <thead>
                 <tr>
-                    <td>{{ message }}</td>
+                    <th>Message</th>
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for message in messages %}
+                    <tr>
+                        <td>{{ message }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
     <div class="pagination"></div>
-    <a href="/clustering_threads">Retour au clustering</a>
+    <a href="/clustering_threads" class="topic-details-back">Retour au clustering</a>
     <script>
         const table = document.getElementById('messages-table');
         const rows = table.rows;

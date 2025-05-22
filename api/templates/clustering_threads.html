@@ -9,79 +9,17 @@
     <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"></script>
-
-    <style>
-    .table-forum {
-        font-size: 0.93em;
-        border-collapse: collapse;
-        width: 100%;
-        min-width: 700px;
-    }
-    .table-forum th, .table-forum td {
-        border: 1.5px solid #b2bec3;
-        padding: 7px 6px;
-        vertical-align: middle;
-        background: #f5f5f5;
-    }
-    .table-forum th {
-        background: #e3e3e3;
-        color: #1873b7;
-        font-weight: bold;
-        font-size: 0.92em;
-        white-space: nowrap;
-    }
-    .table-forum tr {
-        background: #f5f5f5;
-    }
-    .table-forum tr:nth-child(even) {
-        background: #e9e9e9;
-    }
-    .table-forum th.c-narrow, .table-forum td.c-narrow {
-        min-width: 10px;
-        max-width: 250px;
-        text-align: right;
-    }
-    .table-forum th.c-cours, .table-forum td.c-cours {
-        min-width: 200px;
-        max-width: 600px;
-        text-align: left;
-        white-space: nowrap;
-        font-weight: 500;
-    }
-    .table-responsive {
-        overflow-x: auto;
-        width: 100%;
-        background-color: #e3f0fa;
-        padding: 1em;
-        border-radius: 8px;
-        border: 1px solid #ccc;
-    }
-    .dashboard-thread {
-        margin: 2em auto;
-        max-width: 1200px;
-        padding: 2em;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    .sujet-principal {
-        padding: 1em;
-        border: 1px solid #ccc;
-        border-radius: 8px;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    </style>
 </head>
 <body>
     <div class="dashboard-thread">
-        <h1 style="color: #1873b7; text-align: center;">Regroupement des fils de discussion</h1>
-        <div style="display: flex; justify-content: space-around; border: 2px solid black; padding: 10px; background-color: lightblue; gap: 10px;">
-            <p style="margin: 0;">Nombre de topics: <br/> {{ data.stats.total_topics }}</p>
-            <p style="margin: 0;">Nombre de messages: <br/> {{ data.stats.total_messages }}</p>
-            <p style="margin: 0;">Moyenne nb messages par topic: <br/> {{ data.stats.mean_messages_per_topic | round(2) }}</p>
-            <p style="margin: 0;">Médiane nb messages par topic: <br/> {{ data.stats.median_messages_per_topic | round(2) }}</p>
+        <h1 class="clustering-threads-title">Regroupement des fils de discussion</h1>
+        <div class="clustering-threads-stats-row">
+            <p class="clustering-threads-stats">Nombre de topics: <br/> {{ data.stats.total_topics }}</p>
+            <p class="clustering-threads-stats">Nombre de messages: <br/> {{ data.stats.total_messages }}</p>
+            <p class="clustering-threads-stats">Moyenne nb messages par topic: <br/> {{ data.stats.mean_messages_per_topic | round(2) }}</p>
+            <p class="clustering-threads-stats">Médiane nb messages par topic: <br/> {{ data.stats.median_messages_per_topic | round(2) }}</p>
         </div>
-        <h2 style="text-align: center;">Tableau des Topics</h2>
+        <h2 class="clustering-threads-table-title">Tableau des Topics</h2>
         <div class="table-responsive">
             <table id="topics-table" class="table-forum">
                 <thead>
@@ -120,7 +58,7 @@
             } );
         </script>
 
-        <h2 style="text-align: center;">Histogramme des 20 Topics les plus fréquents</h2>
+        <h2 class="clustering-threads-histogram-title">Histogramme des 20 Topics les plus fréquents</h2>
         <canvas id="topic-histogram"></canvas>
         <script>
             const ctx = document.getElementById('topic-histogram').getContext('2d');
@@ -152,7 +90,7 @@
             }
         </script>
 
-                <a href="/" style="display: block; text-align: center; margin-top: 20px;">Accueil</a>
+        <a href="/" class="clustering-threads-back">Accueil</a>
     </div>
 </body>
 </html>

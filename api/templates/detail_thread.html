@@ -4,69 +4,12 @@
     <meta charset="UTF-8">
     <title>Regroupement des participants - FUN MOOC</title>
     <link rel="stylesheet" href="/static/style.css">
-    <style>
-    .thread-container {
-        max-width: 900px;
-        margin: 40px auto;
-        background: #fff;
-        border-radius: 12px;
-        box-shadow: 0 4px 18px 0 rgba(24, 115, 183, 0.10), 0 1.5px 4px 0 #b2bec3;
-        border: 1.5px solid #e3e3e3;
-        padding: 2.2em 2em 2em 2em;
-    }
-    .thread-title {
-        color: #1873b7;
-        font-size: 1.5em;
-        font-weight: bold;
-        margin-bottom: 1.2em;
-        text-align: center;
-    }
-    .message-thread {
-        margin-bottom: 2em;
-        padding: 1.3em 1.5em;
-        border-radius: 10px;
-        background: #f4faff;
-        border-left: 6px solid #1873b7;
-        border-top: 1px solid #e3e3e3;
-        border-bottom: 1px solid #e3e3e3;
-        box-shadow: 0 2px 8px #dbeafe;
-        transition: background 0.2s;
-    }
-    .message-thread:nth-child(even) {
-        background: #eaf4fb;
-    }
-    .message-header {
-        display: flex;
-        align-items: center;
-        font-weight: bold;
-        color: #2c3e50;
-        margin-bottom: 0.5em;
-        font-size: 1.1em;
-    }
-    .message-header .avatar {
-        font-size: 1.5em;
-        margin-right: 0.7em;
-    }
-    .message-body {
-        color: #222;
-        font-size: 1.18em;
-        margin-bottom: 0.7em;
-        line-height: 1.7;
-        white-space: pre-line;
-    }
-    .message-meta {
-        font-size: 0.98em;
-        color: #888;
-        text-align: right;
-        margin-left: auto;
-    }
-    </style>
 </head>
 <body>
-    <a href="javascript:history.back()" style="position: fixed; left: 30px; top: 40px; background: #1873b7; color: #fff; padding: 0.7em 2em; border-radius: 8px; font-size: 1.08em; font-weight: bold; text-decoration: none; box-shadow: 0 2px 8px #dbeafe; z-index: 1000; transition: background 0.2s;">⟵ Retour</a>
+    <a href="javascript:history.back()" class="thread-back-btn">⟵ Retour</a>
     <div class="thread-container">
         <div class="thread-title">{{ thread.content.title }}</div>
-        <div class="message-body" style="margin-bottom:2em; text-align:center; font-size:1.1em; color:#444;">{{ thread.content.body }}</div>
+        <div class="thread-main-body">{{ thread.content.body }}</div>
         {% for message in thread.content.children %}
             <div class="message-thread">
                 <div class="message-header">
@@ -81,4 +24,4 @@
         {% endfor %}
     </div>
 </body>
-</html> 
+</html>
