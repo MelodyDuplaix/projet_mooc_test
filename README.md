@@ -79,13 +79,16 @@ python main.py
 ```
 
 ## Base de données 
-Importer la base de données MongoDB :
+
+Aller récupérer les fichiers csv sur le drive, dans production apprenants/Groupe1_mooc_projet
+
+### Importer la base de données MongoDB :
 
 ```bash
 mongorestore --db mooc_db --dir path/to/dump/directory
 ```
 
-Importer la base de données PostgreSQL :
+### Importer la base de données PostgreSQL :
 
 ```bash
 psql -U postgres -d mooc_db -f path/to/dump/directory/mooc_db.sql
