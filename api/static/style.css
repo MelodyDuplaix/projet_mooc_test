@@ -635,3 +635,30 @@ ul.messages-thread li:hover {
         padding: 8px 8px;
     }
 }
+
+/* Home page image styling */
+.home-image-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 2.5em 0 2em 0;
+}
+.home-image {
+    width: 80%;
+    max-width: 950px;
+    min-width: 320px;
+    height: auto;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(24, 115, 183, 0.10), 0 1.5px 4px 0 #b2bec3;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+@media (max-width: 900px) {
+    .home-image {
+        width: 98vw;
+        max-width: 98vw;
+        min-width: 0;
+    }
+}
