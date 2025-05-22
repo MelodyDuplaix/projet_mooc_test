@@ -195,23 +195,23 @@ ul.messages-thread li:hover {
     border-radius: 4px;
     margin-left: 6px;
 }
-.sentiment-positif {
+.sentiment-positive {
     background: #d4f8e8;
     color: #218c5a;
 }
-.sentiment-tres-positif {
+.sentiment-very-positive {
     background: #145a32;
     color: #fff;
 }
-.sentiment-neutre {
+.sentiment-neutral {
     background: #f6e58d;
     color: #b7950b;
 }
-.sentiment-negatif {
+.sentiment-negative {
     background: #ffd6d6;
     color: #c0392b;
 }
-.sentiment-tres-negatif {
+.sentiment-very-negative {
     background: #922b21;
     color: #fff;
 }
@@ -636,29 +636,33 @@ ul.messages-thread li:hover {
     }
 }
 
-/* Home page image styling */
 .home-image-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
     width: 100%;
-    margin: 2.5em 0 2em 0;
-}
-.home-image {
-    width: 80%;
     max-width: 950px;
     min-width: 320px;
-    height: auto;
+    margin: 2.5em auto 2em auto; /* centre le wrapper */
+    overflow: hidden;
+    height: 432px; /* 90% de 480px (par exemple), ajuste selon besoin */
     border-radius: 18px;
     box-shadow: 0 4px 24px rgba(24, 115, 183, 0.10), 0 1.5px 4px 0 #b2bec3;
-    display: block;
-    margin-left: auto;
-    margin-right: auto;
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
 }
-@media (max-width: 900px) {
-    .home-image {
-        width: 98vw;
+
+.home-image {
+    width: 100%;
+    display: block;
+    margin: auto;
+    border-radius: 18px;
+}
+
+@media (max-width: 950px) {
+    .home-image-wrapper {
         max-width: 98vw;
-        min-width: 0;
+        height: calc(98vw * 0.9); /* 90% de la largeur */
+    }
+    .home-image {
+        width: 100%;
     }
 }

@@ -27,9 +27,9 @@
             <li>
                 <strong>{{ msg.message.content.username if msg.message.content else msg.message.username }}</strong> : {{ msg.message.content.body if msg.message.content else msg.message.body }}<br>
                 <span class="sentiment sentiment-{{ msg.label|lower|replace(' ', '-')|replace('é', 'e')|replace('è', 'e')|replace('ê', 'e')|replace('à', 'a') }}">
-                    Sentiment : {{ msg.label }} ({{msg.score}})<br>
-                    {% if msg.label == 'Very positif' %} ⭐{% endif %}
-                    {% if msg.label == 'Very negatif' %} ⚠️{% endif %}
+                    Sentiment : {{ msg.label }} ({{msg.score}})
+                    {% if msg.label == 'Very Positive' %} ⭐{% endif %}
+                    {% if msg.label == 'Very Negative' %} ⚠️{% endif %}
                 </span>
             </li>
                 {% endfor %}
