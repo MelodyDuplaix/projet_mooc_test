@@ -77,6 +77,21 @@ pip install -r requirements.txt
 python main.py
 ```
 
+## Base de données 
+Importer la base de données MongoDB :
+
+```bash
+mongorestore --db mooc_db --dir path/to/dump/directory
+```
+
+Importer la base de données PostgreSQL :
+
+```bash
+psql -U postgres -d mooc_db -f path/to/dump/directory/mooc_db.sql
+```
+
+
+
 ## Architecture
 
 projet_mooc_test/
@@ -94,3 +109,23 @@ projet_mooc_test/
 ├── main.py            # Point d'entrée principal de l'application
 ├── README.md          # Documentation principale
 └── requirements.txt   # Dépendances Python
+
+
+## Fonctionnalités principales
+
+1. **Recherche de discussions**
+   - Utilisation d'une base de données MongoDB pour stocker les discussions.
+   - Recherche avancée par mot-clé, titre ou contenu.
+
+2. **Analyse de sentiments**
+   - Analyse des sentiments des messages des utilisateurs.
+   - Classification des messages en positif, négatif ou neutre.
+
+3. **Clustering des discussions**
+   - Clustering des discussions en fonction de leur contenu.
+   - Utilisation de l'algorithme K-Means pour regrouper les discussions.
+
+4. **Clustering des utilisateurs**
+   - Clustering des utilisateurs en fonction de leur activité.
+   - Utilisation de l'algorithme K-Means pour regrouper les utilisateurs.
+
