@@ -293,7 +293,7 @@ def get_participant_clusters_info(df_clustered):
 
 if __name__ == "__main__":
     # Lance le clustering (force recalcul si besoin)
-    result = run_participant_clustering(k=5, force=True)
+    result = run_participant_clustering(k=5, force=False)
     df_clustered = result["df_clustered"]
     X_combined = result["X_combined"]
 

@@ -184,9 +184,9 @@ def clustering_thread_details(request: Request, id: int = Path(...)):
     return templates.TemplateResponse("topic_details.html", {"request": request, **topic_data})
 
 
-# Ajoute ici d'autres routes comme dans l'ancien main.py si besoin
 @router.get("/thread/{thread_id}", response_class=HTMLResponse)
 async def thread_page(request: Request, thread_id: str):
     db = get_mongo_conn()
     thread_doc = db.threads.find_one({"_id": thread_id})
     return templates.TemplateResponse("detail_thread.html", {"request": request, "thread": thread_doc})
+

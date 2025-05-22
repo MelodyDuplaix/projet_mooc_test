@@ -22,27 +22,43 @@
         text-align: center;
     }
     .message-thread {
-        margin-bottom: 1.5em;
-        padding: 1.1em 1.2em;
-        border-radius: 8px;
-        background: #f8fbff;
-        border: 1px solid #e3e3e3;
-        box-shadow: 0 1px 4px #dbeafe;
+        margin-bottom: 2em;
+        padding: 1.3em 1.5em;
+        border-radius: 10px;
+        background: #f4faff;
+        border-left: 6px solid #1873b7;
+        border-top: 1px solid #e3e3e3;
+        border-bottom: 1px solid #e3e3e3;
+        box-shadow: 0 2px 8px #dbeafe;
+        transition: background 0.2s;
+    }
+    .message-thread:nth-child(even) {
+        background: #eaf4fb;
     }
     .message-header {
+        display: flex;
+        align-items: center;
         font-weight: bold;
         color: #2c3e50;
-        margin-bottom: 0.3em;
+        margin-bottom: 0.5em;
+        font-size: 1.1em;
+    }
+    .message-header .avatar {
+        font-size: 1.5em;
+        margin-right: 0.7em;
     }
     .message-body {
         color: #222;
-        font-size: 1.08em;
-        margin-bottom: 0.5em;
+        font-size: 1.18em;
+        margin-bottom: 0.7em;
+        line-height: 1.7;
+        white-space: pre-line;
     }
     .message-meta {
-        font-size: 0.93em;
+        font-size: 0.98em;
         color: #888;
         text-align: right;
+        margin-left: auto;
     }
     .dashboard-thread {
     background: #fff;
