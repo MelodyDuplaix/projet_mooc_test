@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Fil de discussion</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="discussion-thread-header">
+        <h2 class="discussion-thread-title">Fil de Discussion</h2>
+        <div class="discussion-thread-filter-row">
+            <input type="text" id="thread-selector" placeholder="Tapez pour filtrer..." class="thread-selector-input">
+        </div>
+        <ul id="thread-list" class="thread-list">
+            {% for thread in threads %}
+                <li class="thread-list-item" data-thread-id="{{thread._id}}" data-thread-title="{{thread.content.title}}">{{thread.content.title}}</li>
+            {% endfor %}
+        </ul>
+    </div>
+    <div class="discussion-container dashboard-thread">
+        {% if thread %}
+            <h1 class="discussion-title">Fil de discussion</h1>
+            <p class="sujet-principal"><strong>Sujet :</strong> {{ thread.title }}</p>
+            <ul class="messages-thread">
+            {% if messages and messages|length > 0 %}
+                {% for msg in messages %}
+            <li>
+                <strong>{{ msg.message.content.username if msg.message.content else msg.message.username }}</strong> : {{ msg.message.content.body if msg.message.content else msg.message.body }}<br>
+                <span class="sentiment sentiment-{{ msg.label|lower|replace(' ', '-')|replace('é', 'e')|replace('è', 'e')|replace('ê', 'e')|replace('à', 'a') }}">
+                    Sentiment : {{ msg.label }} ({{msg.score}})<br>
+                    {% if msg.label == 'Very positif' %} ⭐{% endif %}
+                    {% if msg.label == 'Very negatif' %} ⚠️{% endif %}
+                </span>
+            </li>
+                {% endfor %}
+            </ul>
+            {% else %}
+                <p>Aucun message trouvé pour ce fil.</p>
+            {% endif %}
+        {% endif %}
+        <div class="discussion-thread-footer">
+            <a href="/">Retour à l'accueil</a>
+        </div>
+    </div>
+    <script>
+        const threadSelector = document.getElementById('thread-selector');
+        const threadList = document.getElementById('thread-list');
+        const messagesThread = document.querySelector('.messages-thread');
+
+        // Fonction pour masquer tous les threads
+        function hideAllThreads() {
+            const listItems = threadList.querySelectorAll('li');
+            listItems.forEach(item => {
+                item.style.display = 'none';
+            });
+        }
+
+        // Fonction pour afficher les 10 premiers threads
+        function showFirstTenThreads() {
+            const listItems = threadList.querySelectorAll('li');
+            listItems.forEach(item => {
+                item.style.display = 'none';
+            });
+            const firstTen = threadList.querySelectorAll('li:nth-child(-n+10)');
+            firstTen.forEach(item => {
+                item.style.display = 'block';
+            });
+        }
+
+        // Initialisation de l'affichage au chargement
+        window.addEventListener('DOMContentLoaded', () => {
+            if (messagesThread) {
+                // Si la liste des messages existe, masquer la liste des threads si le champ est vide
+                if (threadSelector.value.trim() === "") {
+                    hideAllThreads();
+                }
+            } else {
+                // Sinon, afficher 10 threads seulement si le champ est vide
+                if (threadSelector.value.trim() === "") {
+                    showFirstTenThreads();
+                }
+            }
+        });
+
+        threadSelector.addEventListener('input', () => {
+            const filter = threadSelector.value.toLowerCase();
+            const listItems = threadList.querySelectorAll('li');
+            if (messagesThread) {
+                // Si la liste des messages existe, masquer la liste si le champ est vide
+                if (filter === "") {
+                    hideAllThreads();
+                } else {
+                    listItems.forEach(item => {
+                        const title = item.dataset.threadTitle.toLowerCase();
+                        item.style.display = title.includes(filter) ? 'block' : 'none';
+                    });
+                }
+            } else {
+                // Sinon, filtrer normalement et afficher 10 si vide
+                if (filter === "") {
+                    showFirstTenThreads();
+                } else {
+                    listItems.forEach(item => {
+                        const title = item.dataset.threadTitle.toLowerCase();
+                        item.style.display = title.includes(filter) ? 'block' : 'none';
+                    });
+                }
+            }
+        });
+
+        threadList.addEventListener('click', (event) => {
+            if (event.target.tagName === 'LI') {
+                const threadId = event.target.dataset.threadId;
+                selectThread(threadId);
+            }
+        });
+
+        function selectThread(threadId) {
+            const form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/discussion_thread';
+            const hiddenInput = document.createElement('input');
+            hiddenInput.type = 'hidden';
+            hiddenInput.name = 'thread_id';
+            hiddenInput.value = threadId;
+            form.appendChild(hiddenInput);
+            document.body.appendChild(form);
+            form.submit();
+        }
+    </script>
+</body>
+</html>

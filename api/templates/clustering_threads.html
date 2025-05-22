@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Clustering des fils de discussion - FUN MOOC</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+    <script type="text/javascript" src="https://cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"></script>
+</head>
+<body>
+    <div class="dashboard-thread">
+        <h1 class="clustering-threads-title">Regroupement des fils de discussion</h1>
+        <div class="clustering-threads-stats-row">
+            <p class="clustering-threads-stats">Nombre de topics: <br/> {{ data.stats.total_topics }}</p>
+            <p class="clustering-threads-stats">Nombre de messages: <br/> {{ data.stats.total_messages }}</p>
+            <p class="clustering-threads-stats">Moyenne nb messages par topic: <br/> {{ data.stats.mean_messages_per_topic | round(2) }}</p>
+            <p class="clustering-threads-stats">Médiane nb messages par topic: <br/> {{ data.stats.median_messages_per_topic | round(2) }}</p>
+        </div>
+        <h2 class="clustering-threads-table-title">Tableau des Topics</h2>
+        <div class="table-responsive">
+            <table id="topics-table" class="table-forum">
+                <thead>
+                    <tr>
+                        <th class="c-narrow">ID</th>
+                        <th class="c-cours">Nom</th>
+                        <th class="c-cours">Mots clés</th>
+                        <th class="c-narrow">Nombre de messages</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for topic in data.topics_table %}
+                    {% if topic.topic_id != -1 %}
+                    <tr>
+                        <td class="c-narrow">{{ topic.topic_id }}</td>
+                        <td class="c-narrow"><a href="/clustering_thread/{{topic.topic_id}}">{{ topic.topic_name | truncate(50) }}</a></td>
+                        <td class="c-cours">{{ topic.topic_keywords | truncate(100) }}</td>
+                        <td class="c-narrow">{{ topic.count }}</td>
+                    </tr>
+                    {% endif %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <script>
+            $(document).ready( function () {
+                $('#topics-table').DataTable({
+                    "pagingType": "full_numbers",
+                    "lengthMenu": [ [10, 25, 50, -1], [10, 25, 50, "All"] ],
+                    "pageLength": 10,
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"
+                    }
+                });
+            } );
+        </script>
+
+        <h2 class="clustering-threads-histogram-title">Histogramme des 20 Topics les plus fréquents</h2>
+        <canvas id="topic-histogram"></canvas>
+        <script>
+            const ctx = document.getElementById('topic-histogram').getContext('2d');
+            const chartData = JSON.parse('{{ data.topics_table | tojson | safe }}').filter(topic => topic.topic_id !== -1);
+            if (chartData && chartData.length > 0) {
+                const sortedData = chartData.sort((a, b) => b.count - a.count).slice(0, 20);
+                const labels = sortedData.map(topic => topic.topic_name);
+                const counts = sortedData.map(topic => topic.count);
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            label: 'Nombre de messages',
+                            data: counts,
+                            backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                            borderColor: 'rgba(54, 162, 235, 1)',
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true
+                            }
+                        }
+                    }
+                });
+            }
+        </script>
+
+        <a href="/" class="clustering-threads-back">Accueil</a>
+    </div>
+</body>
+</html>

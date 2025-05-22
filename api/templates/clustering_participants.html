@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Regroupement des participants - FUN MOOC</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="dashboard-thread">
+        <h1 class="clustering-title">Regroupement des participants au MOOCs</h1>
+        <div class="clustering-header-link">
+            <a href="/">Retour à l'Accueil</a>
+        </div>
+        <h2>Statistiques des Clusters</h2>
+        <div class="table-responsive">
+            <table id="cluster-stats" class="table-forum">
+                <thead>
+                    <tr>
+                        <th>Cluster</th>
+                        <th>Nombre d'utilisateurs</th>
+                        <th>Score d'engagement moyen</th>
+                        <th>Nombre de messages moyen</th>
+                        <th>Nombre de votes moyen</th>
+                        <th>Nombre de commentaires moyen</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for stat in clusters_info.stats %}
+                        <tr>
+                            <td>{{ stat.cluster }}</td>
+                            <td>{{ stat.nb_utilisateurs }}</td>
+                            <td>{{ stat.engagement_score }}</td>
+                            <td>{{ stat.nb_messages }}</td>
+                            <td>{{ stat.votes_count }}</td>
+                            <td>{{ stat.comments_count }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        <h2>Top Cours par Cluster</h2>
+        <div id="top-courses">
+            {% for cluster_id, courses in clusters_info.top_courses.items() %}
+                <h3>Cluster {{ cluster_id }}</h3>
+                <ul>
+                    {% for course, count in courses.items() %}
+                        <li>{{ course }} ({{ count }})</li>
+                    {% endfor %}
+                </ul>
+            {% endfor %}
+        </div>
+        <h2>Analyse de Similarité</h2>
+        <form method="post" action="/clustering_participants" class="similarity-form">
+            <label for="user-search" class="similarity-label">Rechercher un utilisateur :</label>
+            <input type="text" id="user-search" name="user_id" class="similarity-input">
+            <button type="submit" class="similarity-btn">OK</button>
+        </form>
+        <div id="similarity-results">
+            {% if similarity_results %}
+                <h2 class="similarity-results-title">Résultats de Similarité pour {{ selected_user }}</h2>
+                <div class="table-responsive">
+                    <table id="similarity-table" class="table-forum">
+                        <thead>
+                            <tr>
+                                <th>Utilisateur</th>
+                                <th>Similarité</th>
+                                <th>Engagement</th>
+                                <th>Nombre de messages</th>
+                                <th>Nombre de votes</th>
+                                <th>Nombre de commentaires</th>
+                                <th>Cours</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for result in similarity_results %}
+                                <tr>
+                                    <td>{{ result.user_id }}</td>
+                                    <td>{{ result.similarité }}</td>
+                                    <td>{{ result.engagement }}</td>
+                                    <td>{{ result.nb_messages }}</td>
+                                    <td>{{ result.nb_votes }}</td>
+                                    <td>{{ result.nb_commentaires }}</td>
+                                    <td>{{ result.cours | join(', ') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

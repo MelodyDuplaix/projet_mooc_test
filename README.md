@@ -16,6 +16,8 @@ Ce projet vise à monitorer une formation à distance en utilisant des technique
 - **Python:** API et Application web
 - **PostgreSQL:** Utilisée pour le stockage des embeddings, des documents et des similarités.
 - **Hugging Face:** Utilisée pour le modèle de langage, d'embedding et de clustering.
+- **PostgreSQL:** Utilisée pour le stockage des embeddings, des documents et des similarités.
+- **Hugging Face:** Utilisée pour le modèle de langage, d'embedding et de clustering.
 
 ## Données
 
@@ -24,8 +26,7 @@ sous forme de documents JSON.
 
 Les données sont ensuite exportées dans la base de données PostgreSQL pour le stockage des embeddings, des documents et des similarités.
 
-## Architecture
-
+Les données sont ensuite exportées dans la base de données PostgreSQL pour le stockage des embeddings, des documents et des similarités.
 
 ## Livrables
 

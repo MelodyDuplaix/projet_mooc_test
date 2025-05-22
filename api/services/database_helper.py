@@ -175,6 +175,18 @@ def get_similarity_score_between_vectors(conn, id1, id2):
         return None
 
 def get_all_data_similar_documents(doc_list, mongo_url, collection_name, conn):
+    """
+    Récupère toutes les données des documents similaires à partir de la liste de documents fournie.
+
+    Args:
+        doc_list (list): Liste de documents similaires.
+        mongo_url (str): URL de connexion à la base de données MongoDB.
+        collection_name (str): Nom de la collection dans MongoDB.
+        conn (conn): Connection à la base de données PostgreSQL.
+
+    Returns:
+        list[dict]: Liste de dictionnaires contenant les données des documents similaires.
+    """
     data_list = []
     seen = set()
     thread_children_map = {}

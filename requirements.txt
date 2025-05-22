@@ -9,3 +9,4 @@ fastapi
 uvicorn
 sentence_transformers
 scikit-learn
+python-multipart

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Recherche de threads - FUN MOOC</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="dashboard-thread">
+        <h1 class="question-title">Poser une question</h1>
+        <form id="formulaireQuestion" method="post" class="question-form">
+            <label for="question" class="question-label">Posez votre question ou recherche :</label>
+            <input type="text" id="question" name="question" required class="question-input">
+            <button type="submit" class="question-btn">Rechercher</button>
+        </form>
+        {% if reponse %}
+            <div class="sujet-principal" style="margin-top: 24px;">
+                <h2 class="question-results-title">Résultats de la recherche :</h2>
+                {% if reponse | length > 0 %}
+                    <div class="table-responsive">
+                        <table id="tableau-users" class="table-forum">
+                            <thead>
+                                <tr style="background-color: #e3f0fa;">
+                                    <th class="c-narrow">User ID</th>
+                                    <th class="c-cours sorting" tabindex="0" aria-controls="tableau-users" rowspan="1" colspan="1" aria-label="Cours: activate to sort column ascending" style="width: 160px;">Threads</th>
+                                    <th class="c-narrow">Message</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for doc in reponse %}
+                                    <tr>
+                                        <td class="c-narrow">{{ doc.user_id }}</td>
+                                        <td class="c-narrow"><a href="/thread/{{ doc._id }}">{{ doc.title }}</a></td>
+                                        <td class="c-cours">{{ doc.body|truncate(150) }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <p>Aucun résultat trouvé.</p>
+                {% endif %}
+            </div>
+            <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+            <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+            <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+            <script>
+            function initDataTable() {
+                if ($.fn.DataTable.isDataTable('#tableau-users')) {
+                    $('#tableau-users').DataTable().destroy();
+                }
+                $('#tableau-users').DataTable({
+                    "pageLength": 10,
+                    "lengthChange": false,
+                    "searching": false,
+                    "language": {
+                        "url": "//cdn.datatables.net/plug-ins/1.13.6/i18n/fr-FR.json"
+                    }
+                });
+            }
+
+            $(document).ready(function() {
+                initDataTable();
+            });
+            </script>
+        {% endif %}
+        <div class="question-back-link">
+            <a href="/">Retour à l'accueil</a>
+        </div>
+    </div>
+
+    <script>
+    document.getElementById("formulaireQuestion").addEventListener("submit", function(event) {
+        event.preventDefault();
+        const form = event.target;
+        const formData = new FormData(form);
+        const apiKey = "e4030af0-3d1d-4be2-9f34-21081a38a292"; // Remplace par ta clé API générée
+
+        fetch(form.action || window.location.pathname, {
+            method: form.method,
+            headers: {
+                "X-API-Key": apiKey,
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: new URLSearchParams(formData).toString()
+        })
+        .then(response => response.text())
+        .then(html => {
+            document.open();
+            document.write(html);
+            document.close();
+            // Réinitialise DataTables après le nouveau rendu
+            setTimeout(function() {
+                if (window.$ && $('#tableau-users').length) {
+                    initDataTable();
+                }
+            }, 100);
+        })
+        .catch(error => {
+            alert("Erreur lors de la requête : " + error);
+        });
+    });
+    </script>
+</body>
+</html>

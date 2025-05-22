@@ -1,17 +1,28 @@
 import csv
 from embedding_utils import embed_content
 from db_utils import create_table, insert_data, connect_db, get_embedding, get_similar_documents, create_similarity_indexes_table, get_all_documents
-from google import genai
-from google.genai import types
+import google.generativeai as genai
+# from google.genai import types  # Ce module n'existe pas dans google-generativeai
 import os
 from dotenv import load_dotenv
 import time
+from fastapi.templating import Jinja2Templates
+from fastapi.responses import HTMLResponse
+from fastapi import FastAPI, Request
+
+app = FastAPI()
 
 load_dotenv()
 
 API_KEY = os.getenv("GENAI_API_KEY")
-client = genai.Client(api_key=API_KEY)
 
+# Configure l'API Google Generative AI si la clé API est disponible
+if API_KEY:
+    genai.configure(api_key=API_KEY)
+else:
+    print("Attention : Clé API GENAI non trouvée. Les fonctionnalités d'IA seront désactivées.")
+
+templates = Jinja2Templates(directory="api/templates")
 
 def insert_documents(cursor, client):
     try:
@@ -44,12 +55,16 @@ def get_similar_docs(cursor, doc_id):
         print(f"An error occurred during similar document retrieval: {e}")
 
 
-conn = connect_db()
-if conn:
-    cursor = conn.cursor()
-    get_similar_docs(cursor, 2)
-    data = create_similarity_indexes_table(cursor)
-    csv.writer(open('data/similarity_indexes.csv', 'w', newline='', encoding='utf-8')).writerows(data)
-    data = get_all_documents(cursor)
-    csv.writer(open('data/documents.csv', 'w', newline='', encoding='utf-8')).writerows(data)
-    conn.close()
+# conn = connect_db()
+# if conn:
+#     cursor = conn.cursor()
+#     get_similar_docs(cursor, 2)
+#     data = create_similarity_indexes_table(cursor)
+#     csv.writer(open('data/similarity_indexes.csv', 'w', newline='', encoding='utf-8')).writerows(data)
+#     data = get_all_documents(cursor)
+#     csv.writer(open('data/documents.csv', 'w', newline='', encoding='utf-8')).writerows(data)
+#     conn.close()
+
+@app.get("/", response_class=HTMLResponse)
+def home(request: Request):
+    return templates.TemplateResponse("home.html", {"request": request})

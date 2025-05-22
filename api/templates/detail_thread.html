@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Regroupement des participants - FUN MOOC</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <a href="javascript:history.back()" class="thread-back-btn">⟵ Retour</a>
+    <div class="thread-container">
+        <div class="thread-title">{{ thread.content.title }}</div>
+        <div class="thread-main-body">{{ thread.content.body }}</div>
+        {% for message in thread.content.children %}
+            <div class="message-thread">
+                <div class="message-header">
+                    <span class="avatar">👤</span>
+                    <span>{{ message.username or 'Anonyme' }}</span>
+                    <span class="message-meta">
+                        🕒 {{ message.created_at if message.created_at else '' }}
+                    </span>
+                </div>
+                <div class="message-body">{{ message.body | replace('\n', '<br>') | safe }}</div>
+            </div>
+        {% endfor %}
+    </div>
+</body>
+</html>
