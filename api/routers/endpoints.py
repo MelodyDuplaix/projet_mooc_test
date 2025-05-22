@@ -7,6 +7,7 @@ from api.services.database_helper import connect_to_db, get_similar_documents, g
 from api.services.sentiment import get_message_for_thread
 from api.services.embedding import embedding_message
 from api.services.clustering_module import get_all_data, get_topic_details
+from api.services.clustering_participants import run_participant_clustering, get_participant_clusters_info, recommend_similar_users
 from pymongo import MongoClient
 
 router = APIRouter()
@@ -79,72 +80,10 @@ async def question_submit(request: Request, question: str = Form(...)): # Ajout 
         }
     )
 
-@router.get("/discussion", response_class=HTMLResponse)
-def discussion_page(request: Request):
-    # This route definition might also be duplicated if it exists in main.py
-    messages = [
-        {"auteur": "Alice", "texte": "Super projet !", "sentiment": "Très positif", "langue": "fr"},
-        {"auteur": "Bob", "texte": "Pas mal", "sentiment": "Positif", "langue": "fr"},
-        {"auteur": "Eve", "texte": "Bof", "sentiment": "Neutre", "langue": "en"},
-        {"auteur": "John", "texte": "Nul", "sentiment": "Négatif", "langue": "fr"},
-        {"auteur": "Jane", "texte": "Horrible", "sentiment": "Très négatif", "langue": "fr"},
-    ]
-    nb_tres_positif = sum(1 for m in messages if m["sentiment"] == "Très positif")
-    nb_positif = sum(1 for m in messages if m["sentiment"] == "Positif")
-    nb_neutre = sum(1 for m in messages if m["sentiment"] == "Neutre")
-    nb_negatif = sum(1 for m in messages if m["sentiment"] == "Négatif")
-    nb_tres_negatif = sum(1 for m in messages if m["sentiment"] == "Très négatif")
-    langues = list(set(m["langue"] for m in messages))
-    thread = {"titre": "Avis du forum", "messages": messages}
-    return templates.TemplateResponse(
-        "discussion_thread.html",
-        {
-            "request": request,
-            "thread": thread,
-            "nb_tres_positif": nb_tres_positif,
-            "nb_positif": nb_positif,
-            "nb_neutre": nb_neutre,
-            "nb_negatif": nb_negatif,
-            "nb_tres_negatif": nb_tres_negatif,
-            "langues": langues,
-            "get_flag": get_flag,
-        }
-    )
-
 @router.get("/clustering_threads", response_class=HTMLResponse)
 def clustering_threads(request: Request):
     data = get_all_data()
     return templates.TemplateResponse("clustering_threads.html", {"request": request, "data": data})
-
-@router.get("/clustering_participants", response_class=HTMLResponse)
-def clustering_participants(request: Request):
-    # This route definition might also be duplicated if it exists in main.py
-    clusters = [
-        {
-            "nom": "Gros contributeurs",
-            "participants": [
-                {"nom": "Alice", "nb_messages": 42, "langue": "fr", "role": "apprenant", "style": "positif", "forums": ["IA", "Python"]},
-                {"nom": "Bob", "nb_messages": 38, "langue": "en", "role": "apprenant", "style": "neutre", "forums": ["Python", "Projet final"]}
-            ]
-        },
-        {
-            "nom": "Nouveaux inscrits",
-            "participants": [
-                {"nom": "Eve", "nb_messages": 5, "langue": "fr", "role": "apprenant", "style": "positif", "forums": ["Introduction"]},
-                {"nom": "John", "nb_messages": 3, "langue": "en", "role": "apprenant", "style": "neutre", "forums": ["Introduction", "Projet final"]}
-            ]
-        },
-        {
-            "nom": "Modérateurs",
-            "participants": [
-                {"nom": "Jane", "nb_messages": 60, "langue": "fr", "role": "modérateur", "style": "positif", "forums": ["IA", "Python", "Projet final"]}
-            ]
-        }
-    ]
-    return templates.TemplateResponse(
-        "clustering_participants.html",
-        {"request": request, "clusters": clusters, "get_flag": get_flag}
-    )
 
 def get_mongo_conn():
     mongo_url = os.getenv("MONGO_URL")
@@ -190,3 +129,47 @@ async def thread_page(request: Request, thread_id: str):
     thread_doc = db.threads.find_one({"_id": thread_id})
     return templates.TemplateResponse("detail_thread.html", {"request": request, "thread": thread_doc})
 
+@router.get("/clustering_participants", response_class=HTMLResponse)
+def clustering_participants(request: Request):
+    result = run_participant_clustering(k=5, force=False)
+    df_clustered = result["df_clustered"]
+    X_combined = result["X_combined"]
+    clusters_info = get_participant_clusters_info(df_clustered)
+    print(clusters_info["stats"])
+    print(type(clusters_info["stats"]))
+    return templates.TemplateResponse(
+        "clustering_participants.html",
+        {
+            "request": request,
+            "clusters_info": clusters_info,
+            "df_clustered": df_clustered,
+            "X_combined": X_combined
+        }
+    )
+
+@router.post("/clustering_participants", response_class=HTMLResponse)
+async def similarity_results(request: Request, user_id: str = Form(...)):
+    result = run_participant_clustering(k=5, force=False)
+    if not result or "df_clustered" not in result or result["df_clustered"].empty:
+        return templates.TemplateResponse("clustering_participants.html", {"request": request, "error": "Erreur lors du clustering"})
+    df_clustered = result["df_clustered"]
+    X_combined = result["X_combined"]
+    clusters_info = get_participant_clusters_info(df_clustered)
+    
+    matching_users = df_clustered[df_clustered['user_id'].str.contains(user_id, case=False, na=False)]
+    if matching_users.empty:
+        return templates.TemplateResponse("clustering_participants.html", {"request": request, "clusters_info": clusters_info, "df_clustered": df_clustered, "X_combined": X_combined, "error": "Aucun utilisateur trouvé"})
+    
+    selected_user = matching_users['user_id'].iloc[0] # Select the first matching user
+    similarity_results = recommend_similar_users(selected_user, df_clustered, X_combined, top_n=3)
+    return templates.TemplateResponse(
+        "clustering_participants.html",
+        {
+            "request": request,
+            "clusters_info": clusters_info,
+            "df_clustered": df_clustered,
+            "X_combined": X_combined,
+            "similarity_results": similarity_results,
+            "selected_user": selected_user
+        }
+    )

@@ -231,13 +231,14 @@ def run_participant_clustering(k=5, force=False):
     }
 
 def get_cluster_stats(df_clustered):
-    return df_clustered.groupby('cluster').agg({
+    stats_df = df_clustered.groupby('cluster').agg({
         'votes.count': 'mean',
         'comments_count': 'mean',
         'nb_messages': 'mean',
         'engagement_score': 'mean',
         'user_id': 'count'
-    }).rename(columns={'user_id': 'nb_utilisateurs'}).reset_index()
+    }).rename(columns={'user_id': 'nb_utilisateurs', "votes.count": "votes_count"}).reset_index()
+    return stats_df.to_dict(orient='records')
 
 def get_top_courses_by_cluster(df_clustered, top_n=5):
     result = {}
