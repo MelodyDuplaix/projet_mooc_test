@@ -20,7 +20,8 @@ from api.services.database_helper import connect_to_db, get_all_vectors_from_db,
 from api.services.mongo_helper import get_data_for_thread
 from api.services import sentiment as sentiment_analysis_service
 from api.services import clustering_module
-
+from api.services.clustering_participants import run_participant_clustering
+import psycopg2
 
 # Import the router from the endpoints file
 from api.routers.endpoints import router
@@ -190,6 +191,46 @@ async def force_reload_clustering_data(request: Request, auth: dict = Depends(ge
         return JSONResponse(content={"message": "success"})
     except Exception as e:
         return JSONResponse(content={"error": str(e)}, status_code=500)
+
+def check_table_exists(conn, table_name):
+    with conn.cursor() as cur:
+        cur.execute("""
+            SELECT EXISTS (
+                SELECT FROM information_schema.tables 
+                WHERE table_name = %s
+            );
+        """, (table_name,))
+        return cur.fetchone()[0]
+
+# Vérification des tables au démarrage
+conn = connect_to_db()
+if conn:
+    required_tables = ["embedding", "courses", "threads"]
+    missing_critical = [t for t in required_tables if not check_table_exists(conn, t)]
+    if missing_critical:
+        print(f"[CRITICAL] Les tables suivantes sont manquantes : {missing_critical}. Arrêt du serveur FastAPI.")
+        import sys
+        sys.exit(1)
+
+    # Vérification participant_clusters
+    participant_tables = ["participant_clusters", "participant_cluster_info"]
+    missing_participant = [t for t in participant_tables if not check_table_exists(conn, t)]
+    if missing_participant:
+        print(f"[WARNING] Les tables {missing_participant} sont manquantes. Lancement du clustering participants...")
+        run_participant_clustering(force=True)
+
+    # Vérification topic_info/topic_messages
+    topic_tables = ["topic_info", "topic_messages"]
+    missing_topic = [t for t in topic_tables if not check_table_exists(conn, t)]
+    if missing_topic:
+        print(f"[WARNING] Les tables {missing_topic} sont manquantes. Lancement du clustering messages...")
+        from api.services.clustering_module import reload_or_recalculate
+        reload_or_recalculate(force=True)
+    conn.close()
+else:
+    print("[CRITICAL] Impossible de se connecter à la base de données. Arrêt du serveur FastAPI.")
+    import sys
+    sys.exit(1)
 
 if __name__ == "__main__":
     import uvicorn

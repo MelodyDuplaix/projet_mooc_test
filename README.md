@@ -99,7 +99,6 @@ projet_mooc_test/
 └── requirements.txt   # Dépendances Python
 ```
 
-
 ## Fonctionnalités principales
 
 1. **Recherche de discussions**
