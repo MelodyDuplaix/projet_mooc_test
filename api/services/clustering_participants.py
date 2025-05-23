@@ -156,7 +156,7 @@ def save_participant_clustering_to_db(df_clustered, X_combined):
                 int(row['votes.count']),
                 int(row['comments_count']),
                 ','.join(row['course_id']) if isinstance(row['course_id'], list) else '',
-                list(X_combined[i])
+                X_combined[i].tolist()
             )
             for i, row in df_clustered.iterrows()
         ]
