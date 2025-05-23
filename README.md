@@ -75,8 +75,35 @@ python main.py
 ```
 
 ## Base de données
-Aller récupérer les fichiers csv sur le drive, dans production apprenants.
-Base de données mongodb + postgres avec pgvector, puis importer l'ensemble des données depuis les fichiers csv.
+
+Les fichiers CSV nécessaires sont disponibles sur le Google Drive (dossier "production apprenants"). Voici comment les importer dans les bases de données :
+
+### PostgreSQL (avec pgvector)
+
+- **embedding.csv** : à importer dans la table `embedding` (contient les identifiants, vecteurs d'embedding, liens vers threads/messages).
+- **courses.csv** : à importer dans la table `courses` (liste des cours, identifiants, noms).
+- **threads.csv** : à importer dans la table `threads` de PostgreSQL (structure relationnelle, liens entre threads, cours, etc.).
+
+Pour importer un CSV dans PostgreSQL (exemple sous Windows PowerShell) :
+```powershell
+psql -U <user> -d <database> -c "\copy embedding FROM 'chemin\\vers\\embedding.csv' DELIMITER ',' CSV HEADER;"
+psql -U <user> -d <database> -c "\copy courses FROM 'chemin\\vers\\courses.csv' DELIMITER ',' CSV HEADER;"
+psql -U <user> -d <database> -c "\copy threads FROM 'chemin\\vers\\threads.csv' DELIMITER ',' CSV HEADER;"
+```
+
+### MongoDB
+
+- **threads.csv** : à importer dans la collection `threads` de la base MongoDB (`G1`).
+  - Ce fichier contient les threads complets (structure JSON, titres, contenus, métadonnées, etc.).
+- **documents.csv** : à importer dans la collection `documents` de la base MongoDB (`G1`).
+  - Ce fichier contient les messages individuels (posts/messages isolés, avec leur contenu et leurs métadonnées).
+  - Selon les besoins de l'application, les deux collections sont utilisées pour différentes fonctionnalités (recherche, affichage, etc.).
+
+Pour importer un CSV dans MongoDB :
+```powershell
+mongoimport --uri "mongodb://localhost:27017/G1" --collection threads --type csv --headerline --file chemin\vers\threads.csv
+mongoimport --uri "mongodb://localhost:27017/G1" --collection documents --type csv --headerline --file chemin\vers\documents.csv
+```
 
 ## Architecture
 
