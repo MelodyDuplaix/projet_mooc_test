@@ -80,6 +80,7 @@ Base de données mongodb + postgres avec pgvector, puis importer l'ensemble des 
 
 ## Architecture
 
+```
 projet_mooc_test/
 ├── analyse/           # Outils d'analyse de données et modèles statistiques
 ├── api/               # API REST pour l'interface avec l'application web
@@ -96,7 +97,7 @@ projet_mooc_test/
 ├── rapport.md         # Rapport de présentation du projet
 ├── README.md          # Documentation principale
 └── requirements.txt   # Dépendances Python
-
+```
 
 ## Fonctionnalités principales
 
